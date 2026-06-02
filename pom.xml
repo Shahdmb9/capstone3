@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.example</groupId>
-    <artifactId>capstone3</artifactId>
+    <artifactId>HabitSystem_Capston3</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>capstone3</name>
-    <description>capstone3</description>
+    <name>HabitSystem_Capston3</name>
+    <description>HabitSystem_Capston3</description>
     <url/>
     <licenses>
         <license/>

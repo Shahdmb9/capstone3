@@ -4,9 +4,9 @@ package org.example.capstone3.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.capstone3.Api.ApiException;
-import org.example.capstone3.Model.Parent;
-import org.example.capstone3.Model.Reward;
+import org.example.capstone3.API.ApiException;
+import org.example.capstone3.Models.Parent;
+import org.example.capstone3.Models.Reward;
 import org.example.capstone3.Repository.ParentRepository;
 import org.example.capstone3.Repository.RewardRepository;
 import org.springframework.stereotype.Service;

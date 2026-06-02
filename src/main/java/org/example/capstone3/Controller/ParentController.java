@@ -3,8 +3,8 @@ package org.example.capstone3.Controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.capstone3.Api.ApiResponse;
-import org.example.capstone3.Model.Parent;
+import org.example.capstone3.API.ApiResponse;
+import org.example.capstone3.Models.Parent;
 import org.example.capstone3.Service.ParentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

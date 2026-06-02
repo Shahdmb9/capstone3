@@ -1,4 +1,4 @@
-package org.example.capstone3.Api;
+package org.example.capstone3.API;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

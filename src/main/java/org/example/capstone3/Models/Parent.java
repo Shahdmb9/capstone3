@@ -1,4 +1,4 @@
-package org.example.capstone3.Model;
+package org.example.capstone3.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Setter
@@ -39,6 +38,20 @@ public class Parent {
 
     @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", insertable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private Set<Habit> habit;
+
+//    @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL)
+//    private Set<Task> task;
+
+    //in Task class
+//    @ManyToOne
+//    @JoinColumn(name = "parent_id", referencedColumnName = "id")//optional
+//    @JsonIgnore
+//    private Parent parent;
+
+
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @JsonIgnore

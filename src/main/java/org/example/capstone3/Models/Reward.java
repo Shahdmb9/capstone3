@@ -1,7 +1,6 @@
-package org.example.capstone3.Model;
+package org.example.capstone3.Models;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

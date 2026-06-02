@@ -1,8 +1,8 @@
 package org.example.capstone3.Advice;
 
 import jakarta.validation.ConstraintViolationException;
-import org.example.capstone3.Api.ApiException;
-import org.example.capstone3.Api.ApiResponse;
+import org.example.capstone3.API.ApiException;
+import org.example.capstone3.API.ApiResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.ResponseEntity;
