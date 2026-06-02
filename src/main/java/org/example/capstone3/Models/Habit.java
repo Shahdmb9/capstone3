@@ -3,6 +3,7 @@ package org.example.capstone3.Models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.Set;
 
 @Getter
@@ -34,6 +35,11 @@ public class Habit {
     @JoinColumn(name = "individual_id", referencedColumnName = "id")
     @JsonIgnore
     private Individual individual;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id", referencedColumnName = "id")//optional
+    @JsonIgnore
+    private Parent parent;
 
    /* @ManyToOne
     @JoinColumn(name = "child_id", referencedColumnName = "id")
