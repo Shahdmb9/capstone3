@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,20 +37,20 @@ public class AiService {
 
         return sb.toString() ;
     }
-    private  String callClaudeApi(String prompt){
+    public  String callClaudeApi(String prompt){
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-api-key", anthropicApiKey);
         headers.set("anthropic-version", "2023-06-01");
 
-        Map<String , Object> requestBody = Map.of(
-                "model", "claude-sonnet-4-5",
-                "max_tokens", 1000,
-                "messages", List.of(
-                        Map.of("role", "user", "content", prompt)
-                )
-        );
+        Map<String, Object> requestBody = new LinkedHashMap<>();
+        requestBody.put("model", "claude-sonnet-4-5");
+        requestBody.put("max_tokens", 1000);
+        requestBody.put("system", "Respond ONLY with raw JSON. No markdown, no backticks, no explanation.");
+        requestBody.put("messages", List.of(
+                Map.of("role", "user", "content", prompt)
+        ));
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(
@@ -63,7 +64,8 @@ public class AiService {
             if (body != null && body.containsKey("content")) {
                 List<Map<String, Object>> content = (List<Map<String, Object>>) body.get("content");
                 if (!content.isEmpty()) {
-                    return (String) content.get(0).get("text");
+                    String raw = (String) content.get(0).get("text"); // ← fixed, no more 'root'
+                    return raw.replaceAll("(?s)```json\\s*|```", "").trim(); // ← clean and return
                 }
             }
             throw new ApiException("Failed to get response from AI");
