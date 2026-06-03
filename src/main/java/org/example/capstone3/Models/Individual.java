@@ -28,12 +28,12 @@ public class Individual {
     @Column(columnDefinition = "varchar(20)")
     private String phoneNumber;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "int default 0")
     private Integer points = 0;
 
     @OneToOne(mappedBy = "individual", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    private HealthProfile healthProfile;
+    private Profile profile;
 
     @OneToMany(mappedBy = "individual", cascade = CascadeType.ALL)
     private Set<Habit> habits;
@@ -41,4 +41,7 @@ public class Individual {
     @ManyToMany
     @JsonIgnore
     private Set<Badge> badges;
+
+    @ManyToMany(mappedBy = "individual",cascade = CascadeType.ALL)
+    private Set<Category> categories;
 }

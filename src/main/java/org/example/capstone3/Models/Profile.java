@@ -9,11 +9,14 @@ import lombok.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class HealthProfile {
+public class Profile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(columnDefinition = "varchar(1)")
+    private Character gender;
 
     private Double weight;
     private Double height;
@@ -21,6 +24,9 @@ public class HealthProfile {
 
     @Column(columnDefinition = "text")
     private String medicalConditions;
+
+    @Column(columnDefinition = "text")
+    private String badHabit;
 
     @Column(columnDefinition = "varchar(100)", nullable = false)
     private String mainGoal;

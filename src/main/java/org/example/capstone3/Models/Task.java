@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -39,6 +40,11 @@ public class Task {
     private Set<TaskApplication> taskApplications;
 
     @ManyToMany
+    @JoinTable(
+            name = "task_child",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "child_id")
+    )
     @JsonIgnore
-    private Set<Child> children;
+    private Set<Child> children=new HashSet<>();
 }
