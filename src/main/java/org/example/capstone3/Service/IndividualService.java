@@ -52,19 +52,20 @@ public class IndividualService {
     }
 
     public void addInterest (Integer individualId, Integer categoryId){
-
         Individual individual = individualRepository.findIndividualById(individualId);
         Category category = categoryRepository.findCategoryById(categoryId);
-        if (individual==null)
-            throw new ApiException("Parent not found");
-        if(category==null)
+
+        if (individual == null)
+            throw new ApiException("Individual not found"); // ✅ تصحيح نص الرسالة ليكون دقيقاً
+        if (category == null)
             throw new ApiException("Category not found");
 
         individual.getCategories().add(category);
         category.getIndividual().add(individual);
-        categoryRepository.save(category);
-        individualRepository.save(individual);
 
+        individualRepository.save(individual);
     }
+
+
 }
 

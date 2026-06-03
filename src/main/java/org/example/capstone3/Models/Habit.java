@@ -2,6 +2,8 @@ package org.example.capstone3.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.util.Set;
@@ -24,7 +26,9 @@ public class Habit {
     private String description;
 
     @Column(columnDefinition = "varchar(20)", nullable = false)
-    private String frequency; // DAILY, WEEKLY, MONTHLY
+    @NotBlank(message = "Frequency is required")
+    @Pattern(regexp = "^(DAILY|WEEKLY|MONTHLY)$", message = "Frequency must be either DAILY, WEEKLY, or MONTHLY")
+    private String frequency;
 
     @Column(nullable = false)
     private Integer points = 10;

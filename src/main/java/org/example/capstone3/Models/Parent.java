@@ -21,7 +21,7 @@ public class Parent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(columnDefinition = "VARCHAR(40)")
     @NotEmpty(message = "Full name cannot be empty")

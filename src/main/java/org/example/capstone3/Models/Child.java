@@ -3,7 +3,6 @@ package org.example.capstone3.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,6 @@ import lombok.Setter;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -34,7 +32,7 @@ public class Child {
     @Column(columnDefinition = "DATETIME default CURRENT_TIMESTAMP")
     private Date createdAt ;
     @Column(columnDefinition = "int default 0 check (point >= 0)")
-    private Integer point  ;
+    private Integer points  ;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
