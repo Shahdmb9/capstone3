@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -39,7 +38,9 @@ public class TaskApplication {
     private Task task;
 
     @ManyToOne
+    @JoinColumn(name = "child_id", referencedColumnName = "id")
     @JsonIgnore
     private Child child;
+
 
 }

@@ -39,7 +39,6 @@ public class ProfileService {
 
     public void updateProfile(Integer individualId, Profile newProfile) {
         Profile oldProfile = profileRepository.findProfileById(individualId);
-
         if (oldProfile == null) {
             throw new ApiException("Profile not found");
         }
@@ -50,10 +49,15 @@ public class ProfileService {
         oldProfile.setMedicalConditions(newProfile.getMedicalConditions());
         oldProfile.setMainGoal(newProfile.getMainGoal());
 
-        oldProfile.setIndividual(oldProfile.getIndividual());
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual != null) {
+            oldProfile.setIndividual(individual);
+            individual.setProfile(oldProfile);
+        }
 
         profileRepository.save(oldProfile);
     }
+
 
     public void deleteProfile(Integer individualId) {
         Profile profile = profileRepository.findProfileById(individualId);

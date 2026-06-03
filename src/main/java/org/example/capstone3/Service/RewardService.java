@@ -27,20 +27,25 @@ public class RewardService {
         return rewardRepository.findAll();
     }
 
-    public void add(Integer parentId,Integer habitId,Reward reward){
-        Parent parent=parentRepository.findParentById(parentId);
-        Habit habit=habitRepository.findHabitById(habitId);
-        if(habit==null)
-            throw new ApiException("Habit not found");
+    public void add(Integer parentId, Integer habitId, Reward reward) {
+        Parent parent = parentRepository.findParentById(parentId);
+        if (parent == null) throw new ApiException("Parent not found");
 
-        if(parent==null)
-            throw new ApiException("Parent not found");
+        Habit habit = habitRepository.findHabitById(habitId);
+        if (habit == null) throw new ApiException("Habit not found");
 
+        if (habit.getReward() != null) {
+            throw new ApiException("This habit already has a reward linked to it");
+        }
 
         reward.setParent(parent);
         reward.setHabit(habit);
+        reward.setId(habit.getId());
+
+        habit.setReward(reward);
         rewardRepository.save(reward);
     }
+
 
 
 
