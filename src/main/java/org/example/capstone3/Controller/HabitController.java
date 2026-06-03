@@ -30,9 +30,9 @@ public class HabitController {
         return ResponseEntity.status(200).body(habitService.getChildHabits(childId));
     }
 
-    @PostMapping("/add-habit-parent")
-    public ResponseEntity<ApiResponse> addHabitIndividual(@RequestBody @Valid IndividualHabitDTO dto) {
-        habitService.addHabitIndividual(dto);
+    @PostMapping("/add-habit-individual/{individualId}")
+    public ResponseEntity<ApiResponse> addHabitIndividual(@PathVariable Integer individualId,@RequestBody @Valid IndividualHabitDTO dto) {
+        habitService.addHabitIndividual(individualId,dto);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
     }
 
@@ -56,10 +56,29 @@ public class HabitController {
         return ResponseEntity.status(200).body(new ApiResponse("Habit deleted successfully"));
     }
 
-
-    @PostMapping("/complete/{habitId}")
-    public ResponseEntity<ApiResponse> completeHabitToday(@PathVariable Integer habitId) {
-        habitService.completeHabitToday(habitId);
-        return ResponseEntity.status(200).body(new ApiResponse("Habit executed and points credited successfully"));
+    @GetMapping("/get-ind-hapits-streak/{individualId}")
+    public ResponseEntity<?> getIndividualHabit(@PathVariable Integer individualId) {
+        return ResponseEntity.status(200).body(habitService.IndividualStreakPerHabit(individualId));
     }
+
+    @PutMapping("/complete-habit/{habitId}")
+    public ResponseEntity<ApiResponse> completeHabit(@PathVariable Integer habitId) {
+        habitService.logHabit(habitId);
+        return ResponseEntity.status(200).body(new ApiResponse("Habit completed successfully"));
+    }
+
+    @PutMapping("/review-log-of-child/{parentId}/{habitId}/{status}")
+    public ResponseEntity<ApiResponse> reviewHabit(@PathVariable Integer parentId,@PathVariable Integer habitId,@PathVariable String status) {
+        habitService.reviewChildLog(parentId,habitId,status);
+        return ResponseEntity.status(200).body(new ApiResponse("Habit reviewed and updated successfully"));
+    }
+
+
+
+//    //renad
+//    @PostMapping("/complete/{habitId}")
+//    public ResponseEntity<ApiResponse> completeHabitToday(@PathVariable Integer habitId) {
+//        habitService.completeHabitToday(habitId);
+//        return ResponseEntity.status(200).body(new ApiResponse("Habit executed and points credited successfully"));
+//    }
 }

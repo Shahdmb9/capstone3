@@ -31,7 +31,8 @@ public class Child {
     private String password ;
     @Column(columnDefinition = "DATETIME default CURRENT_TIMESTAMP")
     private Date createdAt ;
-    @Column(columnDefinition = "int default 0 check (point >= 0)")
+    @Column(columnDefinition = "int ")
+//    @Column(columnDefinition = "int default 0 check (point >= 0)")
     private Integer points  ;
 
     @ManyToOne

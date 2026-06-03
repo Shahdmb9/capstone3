@@ -8,5 +8,5 @@ public class IndividualHabitDTO {
     private String description;
     private String frequency; // DAILY, WEEKLY
     private Integer categoryId;
-    private Integer individualId;
+    private Integer points;
 }
