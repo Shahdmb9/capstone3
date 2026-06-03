@@ -27,11 +27,12 @@ public class IndividualController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> registerIndividual(@RequestBody Individual individual) {
-
+    public ResponseEntity<ApiResponse> registerIndividual(@RequestBody @Valid Individual individual) {
         individualService.addIndividual(individual);
         return ResponseEntity.status(201).body(new ApiResponse("Individual registered successfully"));
     }
+
+
 
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse> updateIndividual(@PathVariable Integer id, @RequestBody Individual individual) {

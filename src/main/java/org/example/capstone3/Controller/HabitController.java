@@ -30,7 +30,7 @@ public class HabitController {
         return ResponseEntity.status(200).body(habitService.getChildHabits(childId));
     }
 
-    @PostMapping("/add-habit-parent")
+    @PostMapping("/add-habit-individual") // تعديل المسمى ليكون دقيقاً وموجهاً للمستقل
     public ResponseEntity<ApiResponse> addHabitIndividual(@RequestBody @Valid IndividualHabitDTO dto) {
         habitService.addHabitIndividual(dto);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
