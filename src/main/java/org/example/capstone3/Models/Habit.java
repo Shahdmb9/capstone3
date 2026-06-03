@@ -41,10 +41,10 @@ public class Habit {
     @JsonIgnore
     private Parent parent;
 
-   /* @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "child_id", referencedColumnName = "id")
     @JsonIgnore
-    private Child child;*/
+    private Child child;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")

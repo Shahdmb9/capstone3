@@ -21,9 +21,9 @@ public class TaskController {
 
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addTask(@RequestBody @Valid TaskDTOIn taskIn) {
-        taskService.addTask(taskIn);
+    @PostMapping("/add/{parentId}")
+    public ResponseEntity<?> addTask(@PathVariable Integer parentId,@RequestBody @Valid TaskDTOIn taskIn) {
+        taskService.addTask(parentId,taskIn);
         return ResponseEntity.status(200).body(new ApiResponse("task added successfully"));
     }
 

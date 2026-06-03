@@ -10,4 +10,7 @@ import java.util.List;
 public interface HabitRepository extends JpaRepository<Habit, Integer> {
     Habit findHabitById(Integer id);
     List<Habit> findByIndividualId(Integer individualId);
+
+    List<Habit> findByParentId(Integer parentId);
+    List<Habit> findByChildId(Integer childId);
 }

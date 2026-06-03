@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -38,4 +39,14 @@ public class Child {
     @JoinColumn(name = "parent_id")
     @JsonIgnore
     private Parent parent;
+
+    @OneToMany(mappedBy = "child",cascade = CascadeType.ALL)
+    private Set<Habit> habit;
+
+    @OneToMany(mappedBy = "child",cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<TaskApplication> taskApplications;
+
+    @ManyToMany(mappedBy = "children")
+    private Set<Task> task;
 }

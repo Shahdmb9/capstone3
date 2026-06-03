@@ -23,9 +23,9 @@ public class TaskRewardController {
 
     }
 
-    @PostMapping("/add/{taskId}")
-    public ResponseEntity<?> addTaskReward(@PathVariable Integer taskId, @RequestBody @Valid TaskRewardDTOIn taskRewardDTOIn) {
-        taskRewardService.addTaskReward(taskId, taskRewardDTOIn);
+    @PostMapping("/add/{parentId}/{taskId}")
+    public ResponseEntity<?> addTaskReward(@PathVariable Integer parentId,@PathVariable Integer taskId, @RequestBody @Valid TaskRewardDTOIn taskRewardDTOIn) {
+        taskRewardService.addTaskReward(parentId,taskId, taskRewardDTOIn);
         return ResponseEntity.status(200).body(new ApiResponse("task Reward added successfully"));
     }
 
