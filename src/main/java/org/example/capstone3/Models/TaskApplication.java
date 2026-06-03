@@ -34,7 +34,7 @@ public class TaskApplication {
     private LocalDate createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "habit_id", referencedColumnName = "id")
+    @JoinColumn(name = "task_id", referencedColumnName = "id")
     @JsonIgnore
     private Task task;
 

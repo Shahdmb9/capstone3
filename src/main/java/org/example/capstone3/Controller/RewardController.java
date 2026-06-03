@@ -22,9 +22,9 @@ public class RewardController {
         return ResponseEntity.status(200).body(rewardService.getAllRewards());
     }
 
-    @PostMapping("/add/{parentId}")
-    public ResponseEntity<?> add( @PathVariable Integer parentId,@RequestBody @Valid Reward reward){
-        rewardService.add(parentId,reward);
+    @PostMapping("/add/{parentId}/{habitId}")
+    public ResponseEntity<?> add( @PathVariable Integer parentId,@PathVariable Integer habitId,@RequestBody @Valid Reward reward){
+        rewardService.add(parentId,habitId,reward);
         return ResponseEntity.status(200).body(new ApiResponse("Reward added successfully"));
     }
 

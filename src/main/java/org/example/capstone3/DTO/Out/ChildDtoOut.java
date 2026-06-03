@@ -22,7 +22,7 @@ public class ChildDtoOut {
     private String email ;
     private Integer age ;
     private Integer point;
-    private Parent parent;
+    private String parentName;
     private Set<Habit> habits;
     private Set<Task> task;
 }

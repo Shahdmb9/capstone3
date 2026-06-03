@@ -2,8 +2,12 @@ package org.example.capstone3.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
+import org.example.capstone3.Models.Category;
 import org.example.capstone3.Models.Individual;
+import org.example.capstone3.Models.Parent;
+import org.example.capstone3.Repository.CategoryRepository;
 import org.example.capstone3.Repository.IndividualRepository;
+import org.example.capstone3.Repository.ParentRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -12,6 +16,7 @@ import java.util.List;
 public class IndividualService {
 
     private final IndividualRepository individualRepository;
+    private final CategoryRepository categoryRepository;
 
     public List<Individual> getAllIndividuals() {
         return individualRepository.findAll();
@@ -22,6 +27,8 @@ public class IndividualService {
         if (existing != null) {
             throw new ApiException("Email already registered");
         }
+
+        individual.setPoints(0);
         individualRepository.save(individual);
     }
 
@@ -42,6 +49,22 @@ public class IndividualService {
             throw new ApiException("Individual not found");
         }
         individualRepository.delete(individual);
+    }
+
+    public void addInterest (Integer individualId, Integer categoryId){
+
+        Individual individual = individualRepository.findIndividualById(individualId);
+        Category category = categoryRepository.findCategoryById(categoryId);
+        if (individual==null)
+            throw new ApiException("Parent not found");
+        if(category==null)
+            throw new ApiException("Category not found");
+
+        individual.getCategories().add(category);
+        category.getIndividual().add(individual);
+        categoryRepository.save(category);
+        individualRepository.save(individual);
+
     }
 }
 

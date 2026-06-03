@@ -3,42 +3,42 @@ package org.example.capstone3.Service;
 import lombok.RequiredArgsConstructor;
 
 import org.example.capstone3.API.ApiException;
-import org.example.capstone3.Models.HealthProfile;
+import org.example.capstone3.Models.Profile;
 import org.example.capstone3.Models.Individual;
-import org.example.capstone3.Repository.HealthProfileRepository;
+import org.example.capstone3.Repository.ProfileRepository;
 import org.example.capstone3.Repository.IndividualRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class HealthProfileService {
+public class ProfileService {
 
-    private final HealthProfileRepository healthProfileRepository;
+    private final ProfileRepository profileRepository;
     private final IndividualRepository individualRepository;
 
-    public List<HealthProfile> getAllProfiles() {
-        return healthProfileRepository.findAll();
+    public List<Profile> getAllProfiles() {
+        return profileRepository.findAll();
     }
 
-    public void addProfile(HealthProfile profile, Integer individualId) {
+    public void addProfile(Profile profile, Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
 
         if (individual == null) {
             throw new ApiException("Individual not found");
         }
 
-        HealthProfile existingProfile = healthProfileRepository.findHealthProfileById(individualId);
+        Profile existingProfile = profileRepository.findProfileById(individualId);
         if (existingProfile != null) {
             throw new ApiException("Health Profile already exists for this individual");
         }
 
         profile.setIndividual(individual);
-        healthProfileRepository.save(profile);
+        profileRepository.save(profile);
     }
 
-    public void updateProfile(Integer individualId, HealthProfile newProfile) {
-        HealthProfile oldProfile = healthProfileRepository.findHealthProfileById(individualId);
+    public void updateProfile(Integer individualId, Profile newProfile) {
+        Profile oldProfile = profileRepository.findProfileById(individualId);
 
         if (oldProfile == null) {
             throw new ApiException("Profile not found");
@@ -52,11 +52,11 @@ public class HealthProfileService {
 
         oldProfile.setIndividual(oldProfile.getIndividual());
 
-        healthProfileRepository.save(oldProfile);
+        profileRepository.save(oldProfile);
     }
 
     public void deleteProfile(Integer individualId) {
-        HealthProfile profile = healthProfileRepository.findHealthProfileById(individualId);
+        Profile profile = profileRepository.findProfileById(individualId);
 
         if (profile == null) {
             throw new ApiException("Profile not found");
@@ -64,10 +64,10 @@ public class HealthProfileService {
 
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual != null) {
-            individual.setHealthProfile(null);
+            individual.setProfile(null);
             individualRepository.save(individual);
         }
 
-        healthProfileRepository.delete(profile);
+        profileRepository.delete(profile);
     }
 }

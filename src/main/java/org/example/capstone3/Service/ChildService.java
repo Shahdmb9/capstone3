@@ -49,6 +49,6 @@ public class ChildService {
     }
     public ChildDtoOut convertToDTO(Child child ){
 
-        return new ChildDtoOut(child.getId() , child.getFullName(), child.getEmail(), child.getAge() ,child.getPoint(),child.getParent(),child.getHabit(),null);
+        return new ChildDtoOut(child.getId() , child.getFullName(), child.getEmail(), child.getAge() ,child.getPoint(),child.getParent().getFullName(),child.getHabit(),child.getTask());
     }
 }

@@ -27,11 +27,9 @@ public class TaskService {
     public void addTask(Integer parentId,TaskDTOIn taskIn){
         Parent parent=parentService.getParentById(parentId);
         Set<Child> children = new HashSet<>(parent.getChildren());
-        Task task = new Task(null , taskIn.getTitle() , taskIn.getDescription(),"PENDING",taskIn.getStartDate() ,taskIn.getEndDate(),null,null,null,children);
-        for(Child child:children){
-            child.getTask().add(task);
-            childRepository.save(child);
-        }
+        Task task = new Task(null , taskIn.getTitle() , taskIn.getDescription(),"PENDING",taskIn.getStartDate() ,taskIn.getEndDate(),null,parent,null,children);
+        // 2. Save task first to get an ID
+
         taskRepository.save(task);
     }
     public void updateTask( Integer id,TaskDTOIn taskIn){
