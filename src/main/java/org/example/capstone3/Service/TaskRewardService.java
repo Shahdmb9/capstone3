@@ -67,6 +67,7 @@ public class TaskRewardService {
         if (taskReward == null) {
             throw new ApiException("Task Reward not found");
         }
+        // review
         taskRewardRepository.delete(taskReward);
     }
 
