@@ -42,18 +42,14 @@ public class Parent {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private Set<Habit> habit;
 
-//    @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL)
-//    private Set<Task> task;
-
-    //in Task class
-//    @ManyToOne
-//    @JoinColumn(name = "parent_id", referencedColumnName = "id")//optional
-//    @JsonIgnore
-//    private Parent parent;
-
-
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private Set<Task> task;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<Reward> rewards;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Child> children;
 }
