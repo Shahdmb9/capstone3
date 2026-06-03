@@ -8,7 +8,6 @@ import org.example.capstone3.Service.IndividualService;
 import org.example.capstone3.Service.HealthProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/individual")

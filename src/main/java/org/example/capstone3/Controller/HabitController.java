@@ -6,7 +6,6 @@ import org.example.capstone3.DTO.IndividualHabitDTO;
 import org.example.capstone3.Service.HabitService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/habit")
