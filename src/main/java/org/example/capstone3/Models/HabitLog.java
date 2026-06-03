@@ -18,12 +18,12 @@ public class HabitLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ",insertable = false)
     private LocalDate loggedDate = LocalDate.now();
 
     @Column(columnDefinition = "varchar(20)", nullable = false)
     @NotBlank(message = "Approval status is required")
-    @Pattern(regexp = "^(PENDING|APPROVED|REJECTED)$", message = "Status must be either PENDING, APPROVED, or REJECTED")
+    @Pattern(regexp = "^(NOT_STARTED|PENDING|COMPLETED|REJECTED)$", message = "Status must be either PENDING, APPROVED, or REJECTED")
     private String approvalStatus;
 
     @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ",insertable = false)
