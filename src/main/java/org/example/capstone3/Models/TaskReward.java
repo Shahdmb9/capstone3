@@ -25,10 +25,15 @@ public class TaskReward {
     private String status;
     @Column(updatable = false)
     private Date claimedAt;
+
     @OneToOne
     @JoinColumn(name = "task_id", nullable = false, unique = true)
     @MapsId
     @JsonIgnore
     private Task task;
+
+    @ManyToOne
+    @JsonIgnore
+    private Parent parent;
 
 }

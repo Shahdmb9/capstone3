@@ -3,14 +3,8 @@ package org.example.capstone3.Service;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.IndividualHabitDTO;
-import org.example.capstone3.Models.Category;
-import org.example.capstone3.Models.Habit;
-import org.example.capstone3.Models.HabitLog;
-import org.example.capstone3.Models.Individual;
-import org.example.capstone3.Repository.CategoryRepository;
-import org.example.capstone3.Repository.HabitLogRepository;
-import org.example.capstone3.Repository.HabitRepository;
-import org.example.capstone3.Repository.IndividualRepository;
+import org.example.capstone3.Models.*;
+import org.example.capstone3.Repository.*;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -23,12 +17,25 @@ public class HabitService {
     private final IndividualRepository individualRepository;
     private final CategoryRepository categoryRepository;
     private final HabitLogRepository habitLogRepository;
+    private final ParentRepository parentRepository;
+    private final ChildRepository childRepository;
 
     public List<Habit> getIndividualHabits(Integer individualId) {
         return habitRepository.findByIndividualId(individualId);
     }
 
-    public void addHabit(IndividualHabitDTO dto) {
+    public List<Habit> getParentHabits(Integer parentId) {
+        Parent parent=getParent(parentId);
+
+        return habitRepository.findByParentId(parentId);
+    }
+
+    public List<Habit> getChildHabits(Integer childId) {
+        Child child=getChild(childId);
+        return habitRepository.findByChildId(childId);
+    }
+
+    public void addHabitIndividual(IndividualHabitDTO dto) {
         Individual individual = individualRepository.findIndividualById(dto.getIndividualId());
         if (individual == null) {
             throw new ApiException("Individual not found");
@@ -47,6 +54,20 @@ public class HabitService {
         habit.setIsAiSuggested(false);
         habit.setIndividual(individual);
         habit.setCategory(category);
+
+        habitRepository.save(habit);
+    }
+
+    public void addHabitParent(Integer parentId,Integer childId,Habit habit) {
+
+        Parent parent=getParent(parentId);
+        Child child=getChild(childId);
+
+        if(!parent.getChildren().contains(child))
+            throw new ApiException("This is not your child");
+
+        habit.setParent(parent);
+        habit.setChild(child);
 
         habitRepository.save(habit);
     }
@@ -99,5 +120,20 @@ public class HabitService {
         Individual individual = habit.getIndividual();
         individual.setPoints(individual.getPoints() + habit.getPoints());
         individualRepository.save(individual);
+    }
+
+    //helpers
+    public Parent getParent(Integer parentId){
+        Parent parent=parentRepository.findParentById(parentId);
+        if(parent==null)
+            throw new ApiException("Parent not found");
+        return parent;
+    }
+
+    public Child getChild(Integer childId){
+        Child child=childRepository.findChildById(childId);
+        if(child==null)
+            throw new ApiException("Child not found");
+        return child;
     }
 }

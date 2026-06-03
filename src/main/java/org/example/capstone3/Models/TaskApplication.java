@@ -2,15 +2,20 @@ package org.example.capstone3.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class HabitLog {
+public class TaskApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,5 +36,10 @@ public class HabitLog {
     @ManyToOne
     @JoinColumn(name = "habit_id", referencedColumnName = "id")
     @JsonIgnore
-    private Habit habit;
+    private Task task;
+
+    @ManyToOne
+    @JsonIgnore
+    private Child child;
+
 }
