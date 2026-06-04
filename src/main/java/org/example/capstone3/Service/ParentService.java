@@ -60,7 +60,24 @@ public class ParentService {
             Parent parent = parentRepository.findParentById(id);
             if (parent == null)
                 throw new ApiException("Parent not found");
-            return parentRepository.findParentById(id);
+            return parent;
+        }
+
+        public void deductChildPoint(Integer id,Integer childId, Integer points){
+            Parent parent=getParentById(id);
+            Child child=childRepository.findChildById(childId);
+            if(!parent.getChildren().contains(child))
+                throw new ApiException("This is not your child");
+
+            if (child==null)
+                throw new ApiException("Child not found");
+
+            int updatePoints=child.getPoints()-points;
+            if(updatePoints<0)
+                child.setPoints(0);
+            else child.setPoints(updatePoints);
+
+            childRepository.save(child);
         }
 
         public void ChildrenPerformanceReport (Integer id, String period){

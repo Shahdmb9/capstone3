@@ -75,4 +75,19 @@ public class AiService {
         }
     }
 
+    public String generateWhatsAppMessage(String topic, String tone, String language) {
+        String prompt = String.format(
+                "Generate a WhatsApp message about: %s\n" +
+                        "Tone: %s\n" +
+                        "Language: %s\n\n" +
+                        "Requirements:\n" +
+                        "- Keep it concise and suitable for WhatsApp\n" +
+                        "- Use appropriate emojis\n" +
+                        "- Make it personal and engaging\n" +
+                        "- Return ONLY the message text, nothing else",
+                topic, tone, language
+        );
+        return callClaudeApi(prompt);
+    }
+
 }
