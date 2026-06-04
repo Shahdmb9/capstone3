@@ -1,5 +1,7 @@
 package org.example.capstone3.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.IndividualHabitDTO;
@@ -7,7 +9,9 @@ import org.example.capstone3.Models.*;
 import org.example.capstone3.Repository.*;
 import org.jspecify.annotations.NonNull;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.json.JSONObject;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -28,12 +32,30 @@ public class HabitService {
     private  final  EmailService emailService;
     private  final  WhatsAppService whatsAppService;
     private final AiService aiService;
+    private final ModelMapper ModelMapper;
 
+    @Scheduled(cron = "0 0 0 * * *")
+    public void evaluateHabitsDaily() {
+
+        List<Habit> allHabits = habitRepository.findAll();
+
+        for (Habit habit : allHabits) {
+            //create new log for the habit
+            HabitLog log = new HabitLog();
+            log.setLoggedDate(LocalDate.now()); // server date always
+            log.setApprovalStatus("NOT_STARTED");
+            log.setHabit(habit);
+            habitLogRepository.save(log);
+
+        }
+    }
 
 
     public List<Habit> getIndividualHabits(Integer individualId) {
-        return habitRepository.findByIndividualId(individualId);
+        return habitRepository.findHabitByIsAiSuggestedFalseAndIndividualId(individualId);
     }
+
+
 
     public List<Habit> getParentHabits(Integer parentId) {
         Parent parent = getParent(parentId);
@@ -79,10 +101,14 @@ public class HabitService {
 
         if (!parent.getChildren().contains(child))
             throw new ApiException("This is not your child");
-        Habit habit = modelMapper.map(habitIn , Habit.class);
-        HabitLog habitLog = new HabitLog(null,null,"NOT_STARTED",null,LocalDate.now(),habit);
 
-        habitRepository.save(habit);
+        child.getHabit().add(habitIn);
+        habitIn.setChild(child);
+        habitIn.setParent(parent);
+
+        HabitLog habitLog = new HabitLog(null,null,"NOT_STARTED",null,LocalDate.now(),habitIn);
+
+        habitRepository.save(habitIn);
         habitLogRepository.save(habitLog);
 
     }
@@ -145,21 +171,25 @@ public class HabitService {
             individualRepository.save(individual);
         }
         else {
-            //email to the parent telling him about the child's habit'
+            String topic="you're child just update the habit status he need your conformation";
+            String tone="notifyong the parent about pending request";
+            String lang="arabic";
+           String message=aiService.generateWhatsAppMessage(topic,tone,lang);
+           Parent parent=getParent(habit.getParent().getId());
+           whatsAppService.whatsAppMessage(parent.getPhoneNumber(),message);
         }
 
          habitLogRepository.save(log);
-         habitRepository.save(habit); // ✅ persist streak changes
+         habitRepository.save(habit);
 
     }
 
     public void updateStreak(Habit habit) {
         LocalDate today = LocalDate.now();
 
-        List<HabitLog> recentLogs = habitLogRepository
-                .findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
+        List<HabitLog> recentLogs = habitLogRepository.findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
 
-        // Find the most recent log that is NOT today
+        // Find the most recent log that is except today
         LocalDate lastLogDate = null;
         for (HabitLog log : recentLogs) {
             if (log.getLoggedDate().isBefore(today)) {
@@ -170,7 +200,7 @@ public class HabitService {
 
         boolean streakContinues = false;
         if (lastLogDate != null) {
-            streakContinues = isConsecutivePeriod(lastLogDate, today, habit.getFrequency());
+            streakContinues = lastLogDate.isEqual(today.minusDays(1));
         }
 
         if (streakContinues) {
@@ -266,49 +296,51 @@ public class HabitService {
 
     //extra
 
-    public Map<String, Integer> IndividualStreakPerHabit(Integer individualId) {
-        Individual individual = getIndividual(individualId);
+//    public Map<String, Integer> IndividualStreakPerHabit(Integer individualId) {
+//        Individual individual = getIndividual(individualId);
+//
+//        Map<String, Integer> streakMap = new HashMap<>();
+//
+//        //loob through all person habits
+//        for (Habit habit : individual.getHabits()) {
+//
+//            //get all approved logs for this habit to calculate streak
+//            List<HabitLog> approvedLogs = habitLogRepository.findByHabitAndApprovalStatus(habit, "APPROVED");
+//
+//            // saves distinct dates
+//            List<LocalDate> dates = new ArrayList<>();
+//            for (HabitLog log : approvedLogs) {
+//                LocalDate loggedDate = log.getLoggedDate();
+//                if (!dates.contains(loggedDate)) {
+//                    dates.add(loggedDate);
+//                }
+//            }
+//
+//            // Sort dates in reverse order (newest first)
+//            dates.sort(Comparator.reverseOrder());
+//
+//            // Calculate streak
+//            int streak = 0;
+//            if (!dates.isEmpty()) {
+//                streak = 1;
+//                int allowedGap = getAllowedGap(habit.getFrequency());
+//                for (int i = 0; i < dates.size() - 1; i++) {
+//                    //check if the gap between dates is within the allowed gap
+//                    long daysBetween = ChronoUnit.DAYS.between(dates.get(i + 1), dates.get(i));
+//                    //if so increase streak
+//                    if (daysBetween <= allowedGap) streak++;
+//                    else break;
+//                }
+//            }
+//            streakMap.put(habit.getTitle(), streak);
+//        }
+//        if(streakMap.isEmpty())
+//            throw new ApiException("No habits found");
+//
+//        return streakMap;
+//    }
 
-        Map<String, Integer> streakMap = new HashMap<>();
 
-        //loob through all person habits
-        for (Habit habit : individual.getHabits()) {
-
-            //get all approved logs for this habit to calculate streak
-            List<HabitLog> approvedLogs = habitLogRepository.findByHabitAndApprovalStatus(habit, "APPROVED");
-
-            // saves distinct dates
-            List<LocalDate> dates = new ArrayList<>();
-            for (HabitLog log : approvedLogs) {
-                LocalDate loggedDate = log.getLoggedDate();
-                if (!dates.contains(loggedDate)) {
-                    dates.add(loggedDate);
-                }
-            }
-
-            // Sort dates in reverse order (newest first)
-            dates.sort(Comparator.reverseOrder());
-
-            // Calculate streak
-            int streak = 0;
-            if (!dates.isEmpty()) {
-                streak = 1;
-                int allowedGap = getAllowedGap(habit.getFrequency());
-                for (int i = 0; i < dates.size() - 1; i++) {
-                    //check if the gap between dates is within the allowed gap
-                    long daysBetween = ChronoUnit.DAYS.between(dates.get(i + 1), dates.get(i));
-                    //if so increase streak
-                    if (daysBetween <= allowedGap) streak++;
-                    else break;
-                }
-            }
-            streakMap.put(habit.getTitle(), streak);
-        }
-        if(streakMap.isEmpty())
-            throw new ApiException("No habits found");
-
-        return streakMap;
-    }
 
     //helpers
 
@@ -364,17 +396,96 @@ public class HabitService {
         return child;
     }
 
-    private int getAllowedGap(String frequency) {
-        switch (frequency.toUpperCase()) {
-            case "WEEKLY":
-                return 7;
-            case "MONTHLY":
-                return 30;
-            case "YEARLY":
-                return 365;
-            default:
-                return 1; // daily
+//    private int getAllowedGap(String frequency) {
+//        switch (frequency.toUpperCase()) {
+//            case "WEEKLY":
+//                return 7;
+//            case "MONTHLY":
+//                return 30;
+//            case "YEARLY":
+//                return 365;
+//            default:
+//                return 1; // daily
+//        }
+//    }
+
+    public void acceptHabitSuggestedByAI(Integer individualId,Integer habitId) {
+        Habit habit = habitRepository.findHabitById(habitId);
+        if (habit == null) {
+            throw new ApiException("Habit not found");
         }
+        Individual individual=getIndividual(individualId);
+        if(individual!=habit.getIndividual())
+            throw new ApiException("This is not your habit");
+
+        habit.setIsAiSuggested(false);
+        createHabitLog(habitId);
+        habitRepository.save(habit);
+    }
+
+    public void createHabitLog(Integer habitId){
+        Habit habit=getHabitById(habitId);
+        HabitLog habitLog = new HabitLog(null,null,"NOT_STARTED",null,LocalDate.now(),habit);
+        habitLogRepository.save(habitLog);
+
+    }
+
+    public List<Habit> AISuggestedHabit(Integer individualId){
+        Individual individual=individualRepository.findIndividualById(individualId);
+        if(individual==null)
+            throw new ApiException("Individual not found");
+
+        return habitRepository.findHabitByIsAiSuggestedTrueAndIndividualId(individualId);
+    }
+
+    public List<Habit> getHabitsByCategory(Integer categoryId) {
+        Category category=categoryRepository.findCategoryById(categoryId);
+                if (category == null) {
+                    throw new ApiException("Category not found");
+                }
+        return habitRepository.findHabitsByCategory_Id(categoryId);
+
+    }
+
+    public String generateHabits(Integer individualId) {
+
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual == null) {
+            throw new ApiException("Individual not found");
+        }
+        //grab user intrest
+        List<Category> interest=new ArrayList<>(individual.getCategories());
+        if(interest.isEmpty())
+            throw new ApiException("No interest found");
+
+        String prompt = "Generate 5 habits for the following categories:\n" +
+                "- " + interest.toString() + "\n" +
+                "Respond ONLY with a raw JSON object containing:\n" +
+                "1. 'title': e.g., 'Exercise'\n" +
+                "2. 'description': e.g., 'Regular exercise for 30 minutes'\n" +
+                "3. 'frequency': e.g., 'DAILY'\n" +
+                "4. 'points': e.g., 10\n"
+                +"Respond ONLY with raw JSON.";
+
+        String result=aiService.callClaudeApi(prompt);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            // convert json array string to List<Routine>
+            List<Habit> routines = mapper.readValue(result, new TypeReference<List<Habit>>(){});
+
+            // Print the parsed titles
+            for (Habit routine : routines) {
+                Habit habit=modelMapper.map(routine,Habit.class);
+                habit.setIndividual(individual);
+                String cateName=aiService.callClaudeApi("classify this habit by name "+habit.getDescription()+" to one of :"+interest.toString()+"as : 'name': e.g., 'sport'");
+                habit.setCategory(categoryRepository.findCategoryByNameIgnoreCase(new JSONObject(cateName).getString("name")));
+                habit.setIsAiSuggested(true);
+                habitRepository.save(habit);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result ;
     }
 
 

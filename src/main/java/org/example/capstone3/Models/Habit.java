@@ -27,10 +27,10 @@ public class Habit {
 
 
     @Column(columnDefinition = "INT")
-    private int streak;
+    private Integer streak;
 
     @Column(columnDefinition = "INT")
-    private int highestStreak;
+    private Integer highestStreak;
 
     @Column(columnDefinition = "varchar(20)", nullable = false)
     @NotBlank(message = "Frequency is required")
