@@ -18,6 +18,6 @@ public class ChildDtoIn {
     @Positive
     private Integer age ;
     @NotEmpty(message = "password should not be empty ")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$")
+    @Size(min = 8)
     private String password ;
 }

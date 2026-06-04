@@ -5,10 +5,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiResponse;
 import org.example.capstone3.DTO.In.CategoryDTOIn;
-import org.example.capstone3.Models.Category;
+import org.example.capstone3.DTO.Out.CategoryDTOOut;
 import org.example.capstone3.Service.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/category")
@@ -18,7 +20,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/get")
-    public ResponseEntity<?> getAllCategories() {
+    public ResponseEntity<List<CategoryDTOOut>> getAllCategories() {
         return ResponseEntity.status(200).body(categoryService.getAllCategories());
     }
 

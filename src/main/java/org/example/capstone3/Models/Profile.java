@@ -12,7 +12,6 @@ import lombok.*;
 public class Profile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(columnDefinition = "varchar(1)")
@@ -32,12 +31,13 @@ public class Profile {
     private String mainGoal;
 
     @OneToOne
-    @JoinColumn(name = "individual_id", referencedColumnName = "id")
+    @MapsId
+    @JoinColumn(name = "individual_id")
     @JsonIgnore
     private Individual individual;
 
-    /*@OneToOne
+    @OneToOne
     @JoinColumn(name = "child_id", referencedColumnName = "id")
     @JsonIgnore
-    private Child child;*/
+    private Child child;
 }

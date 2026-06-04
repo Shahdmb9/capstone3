@@ -17,6 +17,7 @@ public class TaskDTOIn {
     private String title;
     private String description;
     @NotEmpty(message = "type should not be empty ")
+
     @Pattern(regexp = "DAILY|WEEKLY|MONTHLY|ONE_TIME|CHALLENGE", message = "type must be DAILY, WEEKLY, MONTHLY, ONE_TIME, or CHALLENGE")
     private String type;
     private Date startDate ;
