@@ -25,6 +25,8 @@ public class HabitService {
     private final ParentRepository parentRepository;
     private final ChildRepository childRepository;
     private  final ModelMapper modelMapper;
+    private  final  EmailService emailService;
+    private  final  WhatsAppService whatsAppService;
     private final AiService aiService;
 
 
@@ -261,6 +263,7 @@ public class HabitService {
         return log;
     }
 
+
     //extra
 
     public Map<String, Integer> IndividualStreakPerHabit(Integer individualId) {
@@ -272,8 +275,7 @@ public class HabitService {
         for (Habit habit : individual.getHabits()) {
 
             //get all approved logs for this habit to calculate streak
-            // تغيير الحالة من APPROVED إلى COMPLETED
-            List<HabitLog> approvedLogs = habitLogRepository.findByHabitAndApprovalStatus(habit, "COMPLETED");
+            List<HabitLog> approvedLogs = habitLogRepository.findByHabitAndApprovalStatus(habit, "APPROVED");
 
             // saves distinct dates
             List<LocalDate> dates = new ArrayList<>();
@@ -322,7 +324,6 @@ public class HabitService {
         LocalDate start = getPeriodStart(now, habit.getFrequency());
         return habitLogRepository.findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(habit.getId(), start, now, "COMPLETED");
     }
-
 
     public LocalDate getPeriodStart(LocalDate date, String frequency) {
          switch (frequency) {
