@@ -31,4 +31,9 @@ public class Category {
     )
     @JsonIgnore
     private Set<Individual> individual;
+
+    @Override
+    public String toString() {
+        return id + ":" + name;
+    }
 }

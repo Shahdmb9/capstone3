@@ -15,6 +15,8 @@ public interface HabitLogRepository extends JpaRepository<HabitLog, Integer> {
 
     HabitLog findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(Integer habitId, LocalDate start, LocalDate end, String status);
 
+    HabitLog findHabitLogsByCreatedAt(LocalDate date);
+
     HabitLog findHabitLogByHabit(Habit habit);
 
     List<HabitLog> findByHabitAndApprovalStatusOrderByLoggedDateDesc(Habit habit, String approvalStatus);

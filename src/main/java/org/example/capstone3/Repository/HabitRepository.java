@@ -11,6 +11,14 @@ public interface HabitRepository extends JpaRepository<Habit, Integer> {
     Habit findHabitById(Integer id);
     List<Habit> findByIndividualId(Integer individualId);
 
+    List<Habit> findHabitsByCategory_Id(Integer categoryId);
+
+
+    List<Habit> findHabitByIsAiSuggestedFalseAndIndividualId(Integer individualId);
+
+    List<Habit> findHabitByIsAiSuggestedTrueAndIndividualId(Integer individualId);
+
+
     List<Habit> findByParentId(Integer parentId);
     List<Habit> findByChildId(Integer childId);
 }

@@ -37,6 +37,7 @@ public class ParentController {
         return ResponseEntity.status(200).body(new ApiResponse("Parent updated successfully"));
     }
 
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id){
         parentService.delete(id);
@@ -53,6 +54,12 @@ public class ParentController {
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("Children_Performance_Report", "Report.pdf");
         return ResponseEntity.status(200).headers(headers).body(parentService.childrenPerformanceReport(id, period));
+    }
+
+    @PutMapping("/deduct-child-point/{parentId}/{childId}/{poits}")
+    public ResponseEntity<?> deductChildPoint(@PathVariable Integer parentId,@PathVariable Integer childId,@PathVariable Integer poits) {
+        parentService.deductChildPoint(parentId, childId, poits);
+        return ResponseEntity.status(200).body(new ApiResponse("Points deducted successfully"));
     }
 
 
