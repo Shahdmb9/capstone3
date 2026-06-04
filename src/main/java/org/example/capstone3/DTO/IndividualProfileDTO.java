@@ -7,7 +7,7 @@ import lombok.Data;
 public class IndividualProfileDTO {
     private Double weight;
     private Double height;
-    private Character age;
+    private Integer age;
     private String medicalConditions;
     private String mainGoal;
     private Integer individualId;

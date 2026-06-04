@@ -1,6 +1,7 @@
 package org.example.capstone3.Controller;
 
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiResponse;
 import org.example.capstone3.Models.Badge;
@@ -17,7 +18,7 @@ public class BadgeController {
     private final BadgeRepository badgeRepository;
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> createBadge(@RequestBody Badge badge) {
+    public ResponseEntity<ApiResponse> createBadge(@RequestBody @Valid Badge badge) {
         badgeRepository.save(badge);
         return ResponseEntity.status(201).body(new ApiResponse("New Badge created successfully"));
     }
