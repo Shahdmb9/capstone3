@@ -3,6 +3,7 @@ package org.example.capstone3.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiResponse;
+import org.example.capstone3.DTO.In.IndividualDTOIn;
 import org.example.capstone3.Models.Profile;
 import org.example.capstone3.Models.Individual;
 import org.example.capstone3.Models.Profile;
@@ -27,7 +28,7 @@ public class IndividualController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> registerIndividual(@RequestBody @Valid Individual individual) {
+    public ResponseEntity<ApiResponse> registerIndividual(@RequestBody @Valid IndividualDTOIn individual) {
         individualService.addIndividual(individual);
         return ResponseEntity.status(201).body(new ApiResponse("Individual registered successfully"));
     }
@@ -35,7 +36,7 @@ public class IndividualController {
 
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateIndividual(@PathVariable Integer id, @RequestBody @Valid Individual individual) {
+    public ResponseEntity<ApiResponse> updateIndividual(@PathVariable Integer id, @RequestBody @Valid IndividualDTOIn individual) {
         individualService.updateIndividual(id, individual);
         return ResponseEntity.status(200).body(new ApiResponse("Individual updated successfully"));
     }

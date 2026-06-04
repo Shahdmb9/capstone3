@@ -7,6 +7,7 @@ package org.example.capstone3.Controller;
 
 import jakarta.validation.Valid;
 import lombok.Generated;
+import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiResponse;
 import org.example.capstone3.DTO.IndividualHabitDTO;
 import org.example.capstone3.Models.Habit;
@@ -22,68 +23,68 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping({"/api/v1/habit"})
+@RequestMapping("/api/v1/habit")
+@RequiredArgsConstructor
 public class HabitController {
+
     private final HabitService habitService;
 
-    @GetMapping({"/get-individual-habits/{individualId}"})
+    @GetMapping("/get-individual-habits/{individualId}")
     public ResponseEntity<?> getIndividualHabits(@PathVariable Integer individualId) {
         return ResponseEntity.status(200).body(this.habitService.getIndividualHabits(individualId));
     }
 
-    @GetMapping({"/get-parent-habit/{parentId}"})
+    @GetMapping("/get-parent-habit/{parentId}")
     public ResponseEntity<?> getParentHabits(@PathVariable Integer parentId) {
         return ResponseEntity.status(200).body(this.habitService.getParentHabits(parentId));
     }
 
-    @GetMapping({"/get-child-habit/{childId}"})
+    @GetMapping("/get-child-habit/{childId}")
     public ResponseEntity<?> getChildHabits(@PathVariable Integer childId) {
         return ResponseEntity.status(200).body(this.habitService.getChildHabits(childId));
     }
 
-    @PostMapping({"/add-habit-individual/{individualId}"})
+
+    @PostMapping("/add-habit-individual/{individualId}")
     public ResponseEntity<ApiResponse> addHabitIndividual(@PathVariable Integer individualId, @RequestBody @Valid IndividualHabitDTO dto) {
         this.habitService.addHabitIndividual(individualId, dto);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
     }
 
-    @PostMapping({"/add-habit-parent/{parentId}/{childId}"})
+    @PostMapping("/add-habit-parent/{parentId}/{childId}")
     public ResponseEntity<ApiResponse> addHabitParent(@PathVariable Integer parentId, @PathVariable Integer childId, @RequestBody @Valid Habit habit) {
         this.habitService.addHabitParent(parentId, childId, habit);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
     }
 
-    @PutMapping({"/update/{habitId}"})
+    @PutMapping("/update/{habitId}")
     public ResponseEntity<ApiResponse> updateHabit(@PathVariable Integer habitId, @RequestBody IndividualHabitDTO dto) {
         this.habitService.updateHabit(habitId, dto);
         return ResponseEntity.status(200).body(new ApiResponse("Habit updated successfully"));
     }
 
-    @DeleteMapping({"/delete/{habitId}"})
+    @DeleteMapping("/delete/{habitId}")
     public ResponseEntity<ApiResponse> deleteHabit(@PathVariable Integer habitId) {
         this.habitService.deleteHabit(habitId);
         return ResponseEntity.status(200).body(new ApiResponse("Habit deleted successfully"));
     }
 
-    @GetMapping({"/get-ind-hapits-streak/{individualId}"})
+    @GetMapping("/get-ind-hapits-streak/{individualId}")
     public ResponseEntity<?> getIndividualHabit(@PathVariable Integer individualId) {
         return ResponseEntity.status(200).body(this.habitService.IndividualStreakPerHabit(individualId));
     }
 
-    @PutMapping({"/complete-habit/{habitId}"})
+    @PutMapping("/complete-habit/{habitId}")
     public ResponseEntity<ApiResponse> completeHabit(@PathVariable Integer habitId) {
         this.habitService.logHabit(habitId);
         return ResponseEntity.status(200).body(new ApiResponse("Habit completed successfully"));
     }
 
-    @PutMapping({"/review-log-of-child/{parentId}/{habitId}/{status}"})
+    @PutMapping("/review-log-of-child/{parentId}/{habitId}/{status}")
     public ResponseEntity<ApiResponse> reviewHabit(@PathVariable Integer parentId, @PathVariable Integer habitId, @PathVariable String status) {
         this.habitService.reviewChildLog(parentId, habitId, status);
         return ResponseEntity.status(200).body(new ApiResponse("Habit reviewed and updated successfully"));
     }
-
-    @Generated
-    public HabitController(final HabitService habitService) {
-        this.habitService = habitService;
-    }
 }
+
+
