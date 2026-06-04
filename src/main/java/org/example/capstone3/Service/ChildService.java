@@ -29,7 +29,7 @@ public class ChildService {
     public void addChild (Integer parentId, ChildDtoIn childIn){
         Parent parent = parentRepository.findParentById(parentId);
         if (parent == null) throw new ApiException("Parent not found");
-        Child child = new Child(null,childIn.getFullName(),childIn.getEmail(),childIn.getAge() , childIn.getPassword(),new Date(),0 ,parent,null,null,null);
+        Child child = new Child(null, childIn.getFullName(), childIn.getEmail(), childIn.getAge(), childIn.getPassword(), new Date(), 0, parent, null, null, null, null);
         childRepository.save(child);
     }
     public void updateChild (Integer id ,ChildDtoIn child ){
