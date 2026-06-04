@@ -16,10 +16,5 @@ public class TaskRewardDTOIn {
     @NotEmpty(message = "title should not be empty ")
     private String title;
     private String description;
-    @NotNull(message = "Task ID is required")
-    private Integer taskId;
-
-    @NotNull(message = "Parent ID is required")
-    private Long parentId;
 
 }
