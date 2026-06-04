@@ -25,6 +25,12 @@ public class HabitService {
     private final ParentRepository parentRepository;
     private final ChildRepository childRepository;
     private  final ModelMapper modelMapper;
+    private  final  EmailService emailService;
+    private  final  WhatsAppService whatsAppService;
+    private final AiService aiService;
+
+
+
     public List<Habit> getIndividualHabits(Integer individualId) {
         return habitRepository.findByIndividualId(individualId);
     }
@@ -370,4 +376,30 @@ public class HabitService {
                 return 1; // daily
         }
     }
+
+
+
+    // Commitment Analysis (نسبة الالتزام والـ Streak ومستشار التنبؤ)
+    public String getHabitCommitmentAnalysis(Integer habitId) {
+        Habit habit = habitRepository.findHabitById(habitId);
+        if (habit == null) throw new ApiException("Habit not found");
+
+        // جلب كافة السجلات المكتملة لهذه العادة لحساب معدل الالتزام
+        List<HabitLog> logs = habitLogRepository.findByHabitAndApprovalStatus(habit, "COMPLETED");
+        int completedCount = logs.size();
+
+        String prompt = "Analyze commitment for Habit:\n" +
+                "- Title: " + habit.getTitle() + "\n" +
+                "- Frequency: " + habit.getFrequency() + "\n" +
+                "- Total Successful Logs: " + completedCount + "\n\n" +
+                "Calculate an estimated commitment rate percentage and analyze consistency. Provide a prediction or requirement to maintain a solid streak.\n" +
+                "Respond ONLY with a raw JSON object containing:\n" +
+                "1. 'commitmentPercentage': e.g., '75%'\n" +
+                "2. 'streakStatus': Analysis of current continuity.\n" +
+                "3. 'actionRequired': Exact advice (e.g., 'You need 5 more consecutive days to secure the next milestone').\n" +
+                "Respond ONLY with raw JSON.";
+
+        return aiService.callClaudeApi(prompt);
+    }
+
 }
