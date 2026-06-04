@@ -55,8 +55,6 @@ public class HabitService {
         return habitRepository.findHabitByIsAiSuggestedFalseAndIndividualId(individualId);
     }
 
-
-
     public List<Habit> getParentHabits(Integer parentId) {
         Parent parent = getParent(parentId);
 
@@ -68,7 +66,7 @@ public class HabitService {
         return habitRepository.findByChildId(childId);
     }
 
-    public void addHabitIndividual(Integer individualId,IndividualHabitDTO dto) {
+    public void addHabitIndividual(Integer individualId, IndividualHabitDTO dto) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) {
             throw new ApiException("Individual not found");
@@ -87,7 +85,7 @@ public class HabitService {
         habit.setIndividual(individual);
         habit.setCategory(category);
 
-        HabitLog habitLog = new HabitLog(null,null,"NOT_STARTED",null,LocalDate.now(),habit);
+        HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
 
         habitRepository.save(habit);
         habitLogRepository.save(habitLog);
@@ -488,6 +486,20 @@ public class HabitService {
         return result ;
     }
 
+    public String riskPrediction(Integer id) {
+        Habit habit = habitRepository.findHabitById(id);
+        if (habit == null)
+            throw new RuntimeException("Habit not found");
+        return aiService.callClaudeApi(aiService.buildPromptRiskPrediction(habit));
+
+    }
+    public String BestHabitTime(Integer id) {
+        Habit habit = habitRepository.findHabitById(id);
+        if (habit == null)
+            throw new RuntimeException("Habit not found");
+        return aiService.callClaudeApi(aiService.buildPromptBestTime(habit));
+
+    }
 
 
     // Commitment Analysis (نسبة الالتزام والـ Streak ومستشار التنبؤ)
