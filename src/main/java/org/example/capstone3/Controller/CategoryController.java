@@ -4,6 +4,7 @@ package org.example.capstone3.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiResponse;
+import org.example.capstone3.DTO.In.CategoryDTOIn;
 import org.example.capstone3.Models.Category;
 import org.example.capstone3.Service.CategoryService;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +23,13 @@ public class CategoryController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addCategory(@RequestBody @Valid Category category) {
+    public ResponseEntity<ApiResponse> addCategory(@RequestBody @Valid CategoryDTOIn category) {
         categoryService.addCategory(category);
         return ResponseEntity.status(201).body(new ApiResponse("New Category added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateCategory(@PathVariable Integer id, @RequestBody @Valid Category category) {
+    public ResponseEntity<ApiResponse> updateCategory(@PathVariable Integer id, @RequestBody @Valid CategoryDTOIn category) {
         categoryService.updateCategory(id, category);
         return ResponseEntity.status(200).body(new ApiResponse("Category updated successfully"));
     }

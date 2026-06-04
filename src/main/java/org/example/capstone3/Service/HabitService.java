@@ -6,6 +6,7 @@ import org.example.capstone3.DTO.IndividualHabitDTO;
 import org.example.capstone3.Models.*;
 import org.example.capstone3.Repository.*;
 import org.jspecify.annotations.NonNull;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -23,7 +24,7 @@ public class HabitService {
     private final HabitLogRepository habitLogRepository;
     private final ParentRepository parentRepository;
     private final ChildRepository childRepository;
-
+    private  final ModelMapper modelMapper;
     public List<Habit> getIndividualHabits(Integer individualId) {
         return habitRepository.findByIndividualId(individualId);
     }
@@ -65,17 +66,14 @@ public class HabitService {
 
     }
 
-    public void addHabitParent(Integer parentId, Integer childId, Habit habit) {
+    public void addHabitParent(Integer parentId, Integer childId, Habit habitIn) {
 
         Parent parent = getParent(parentId);
         Child child = getChild(childId);
 
         if (!parent.getChildren().contains(child))
             throw new ApiException("This is not your child");
-
-        habit.setParent(parent);
-        habit.setChild(child);
-
+        Habit habit = modelMapper.map(habitIn , Habit.class);
         HabitLog habitLog = new HabitLog(null,null,"NOT_STARTED",null,LocalDate.now(),habit);
 
         habitRepository.save(habit);

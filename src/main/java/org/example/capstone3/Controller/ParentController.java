@@ -4,6 +4,7 @@ package org.example.capstone3.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiResponse;
+import org.example.capstone3.DTO.In.ParentDTOIn;
 import org.example.capstone3.Models.Parent;
 import org.example.capstone3.Service.ParentService;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +24,13 @@ public class ParentController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody @Valid Parent parent){
+    public ResponseEntity<?> add(@RequestBody @Valid ParentDTOIn parent){
         parentService.add(parent);
         return ResponseEntity.status(200).body(new ApiResponse("Parent added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Integer id,@RequestBody @Valid Parent parent){
+    public ResponseEntity<?> update(@PathVariable Integer id,@RequestBody @Valid ParentDTOIn parent){
         parentService.update(id,parent);
         return ResponseEntity.status(200).body(new ApiResponse("Parent updated successfully"));
     }
