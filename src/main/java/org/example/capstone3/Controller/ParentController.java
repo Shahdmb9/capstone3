@@ -55,6 +55,10 @@ public class ParentController {
         headers.setContentDispositionFormData("Children_Performance_Report", "Report.pdf");
         return ResponseEntity.status(200).headers(headers).body(parentService.childrenPerformanceReport(id, period));
     }
+    @GetMapping("/family_discipline_score/{id}")
+    public  ResponseEntity<?> FamilyDisciplineScore(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(parentService.FamilyDisciplineScore(id));
+    }
 
     @PutMapping("/deduct-child-point/{parentId}/{childId}/{poits}")
     public ResponseEntity<?> deductChildPoint(@PathVariable Integer parentId,@PathVariable Integer childId,@PathVariable Integer poits) {

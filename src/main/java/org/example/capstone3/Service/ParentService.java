@@ -101,6 +101,7 @@ public class ParentService {
         }
 
 
+
         //  تحليل سلوك الطفل للأب بالذكاء الاصطناعي
         public String getChildBehaviorAnalysis (Integer parentId, Integer childId){
             Parent parent = parentRepository.findParentById(parentId);
@@ -136,6 +137,12 @@ public class ParentService {
             }
 
             return pendingLogs;
+        }
+
+        public String FamilyDisciplineScore (Integer parentId){
+            Parent parent = parentRepository.findParentById(parentId);
+            if (parent == null) throw new ApiException("Parent not found");
+            return aiService.callClaudeApi(aiService.buildPromptFamilyScore(parent));
         }
     }
 

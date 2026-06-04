@@ -108,6 +108,14 @@ public class HabitController {
     public ResponseEntity<?> getAiSuggested(@PathVariable Integer individualId){
         return ResponseEntity.status(200).body(habitService.AISuggestedHabit(individualId));
     }
+    @GetMapping("/ia_risk_prediction/{id}")
+    public  ResponseEntity<?> riskPrediction(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(habitService.riskPrediction(id));
+    }
+    @GetMapping("/ia_best_habit_time/{id}")
+    public  ResponseEntity<?> BestHabitTime(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(habitService.BestHabitTime(id));
+    }
 }
 
 
