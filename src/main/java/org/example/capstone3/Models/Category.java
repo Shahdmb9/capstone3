@@ -22,4 +22,13 @@ public class Category {
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private Set<Habit> habits;
+
+    @ManyToMany
+    @JoinTable(
+            name = "category_individual",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "individual_id")
+    )
+    @JsonIgnore
+    private Set<Individual> individual;
 }

@@ -3,6 +3,8 @@ package org.example.capstone3.Models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -28,17 +30,25 @@ public class Individual {
     @Column(columnDefinition = "varchar(20)")
     private String phoneNumber;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "int default 0")
     private Integer points = 0;
 
     @OneToOne(mappedBy = "individual", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    private HealthProfile healthProfile;
+    private Profile profile;
 
     @OneToMany(mappedBy = "individual", cascade = CascadeType.ALL)
     private Set<Habit> habits;
 
     @ManyToMany
-    @JsonIgnore
-    private Set<Badge> badges;
+    @JoinTable(
+            name = "individual_badges",
+            joinColumns = @JoinColumn(name = "individual_id"),
+            inverseJoinColumns = @JoinColumn(name = "badge_id")
+    )
+    private Set<Badge> badges = new HashSet<>();
+
+
+    @ManyToMany(mappedBy = "individual",cascade = CascadeType.ALL)
+    private Set<Category> categories;
 }

@@ -7,6 +7,11 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.capstone3.Models.Habit;
+import org.example.capstone3.Models.Parent;
+import org.example.capstone3.Models.Task;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -16,5 +21,8 @@ public class ChildDtoOut {
     private String fullName ;
     private String email ;
     private Integer age ;
-    private Integer point  ;
+    private Integer point;
+    private String parentName;
+    private Set<Habit> habits;
+    private Set<Task> task;
 }

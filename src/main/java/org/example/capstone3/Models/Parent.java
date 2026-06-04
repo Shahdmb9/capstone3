@@ -21,7 +21,7 @@ public class Parent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(columnDefinition = "VARCHAR(40)")
     @NotEmpty(message = "Full name cannot be empty")
@@ -31,7 +31,8 @@ public class Parent {
     @Email
     @NotEmpty(message = "Email cannot be empty")
     private String email;
-
+    @Column(columnDefinition = "VARCHAR(10)" ,nullable = false ,unique = true)
+    private String phoneNumber;
     @Column(columnDefinition = "VARCHAR(255)")
     @NotEmpty(message = "Password cannot be empty")
     private String password;
@@ -52,4 +53,10 @@ public class Parent {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<Child> children;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<TaskReward> taskRewards;
+
+
 }

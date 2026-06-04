@@ -1,6 +1,7 @@
 package org.example.capstone3.Models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +21,7 @@ import java.time.LocalDateTime;
 public class Reward {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(columnDefinition = "varchar(30) ",nullable = false)
     private String title;
@@ -41,5 +41,11 @@ public class Reward {
     @ManyToOne
     @JoinColumn(name = "parent_id", referencedColumnName = "id")
     private Parent parent;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "habit_id")
+    private Habit habit;
+
 
 }

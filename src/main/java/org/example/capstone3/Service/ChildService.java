@@ -29,7 +29,7 @@ public class ChildService {
     public void addChild (Integer parentId, ChildDtoIn childIn){
         Parent parent = parentRepository.findParentById(parentId);
         if (parent == null) throw new ApiException("Parent not found");
-        Child child = new Child(null,childIn.getFullName(),childIn.getEmail(),childIn.getAge() , childIn.getPassword(),new Date(),0 ,parent);
+        Child child = new Child(null, childIn.getFullName(), childIn.getEmail(), childIn.getAge(), childIn.getPassword(), new Date(), 0, parent, null, null, null, null);
         childRepository.save(child);
     }
     public void updateChild (Integer id ,ChildDtoIn child ){
@@ -49,6 +49,6 @@ public class ChildService {
     }
     public ChildDtoOut convertToDTO(Child child ){
 
-        return new ChildDtoOut(child.getId() , child.getFullName(), child.getEmail(), child.getAge() ,child.getPoint());
+        return new ChildDtoOut(child.getId() , child.getFullName(), child.getEmail(), child.getAge() ,child.getPoints(),child.getParent().getFullName(),child.getHabit(),child.getTask());
     }
 }

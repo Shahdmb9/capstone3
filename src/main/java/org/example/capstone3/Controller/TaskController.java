@@ -21,9 +21,9 @@ public class TaskController {
 
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addTask(@RequestBody @Valid TaskDTOIn taskIn) {
-        taskService.addTask(taskIn);
+    @PostMapping("/add/{parentId}")
+    public ResponseEntity<?> addTask(@PathVariable Integer parentId,@RequestBody @Valid TaskDTOIn taskIn) {
+        taskService.addTask(parentId,taskIn);
         return ResponseEntity.status(200).body(new ApiResponse("task added successfully"));
     }
 
@@ -38,4 +38,20 @@ public class TaskController {
         taskService.deleteTask(id);
         return ResponseEntity.status(200).body(new ApiResponse("task deleted successfully"));
     }
+    // 1. أضيفي حقل الحقن في أعلى الكلاس بجانب بقية الخدمات:
+    private final org.example.capstone3.Service.TaskApplicationService taskApplicationService;
+
+
+    @PostMapping("/apply/{childId}/{taskId}")
+    public ResponseEntity<ApiResponse> childCompleteChallenge(@PathVariable Integer childId, @PathVariable Integer taskId) {
+        taskApplicationService.childApplyForTask(childId, taskId);
+        return ResponseEntity.status(201).body(new ApiResponse("Challenge execution submitted! Waiting for Parent verification"));
+    }
+
+    @PutMapping("/approve/{applicationId}/{action}")
+    public ResponseEntity<ApiResponse> parentVerifyWinner(@PathVariable Integer applicationId, @PathVariable String action) {
+        taskApplicationService.parentApproveTaskWinner(applicationId, action);
+        return ResponseEntity.status(200).body(new ApiResponse("Application processed. Winner verified and prize claimed"));
+    }
+
 }
