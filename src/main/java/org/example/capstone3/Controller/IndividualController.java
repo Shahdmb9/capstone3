@@ -35,7 +35,7 @@ public class IndividualController {
 
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateIndividual(@PathVariable Integer id, @RequestBody Individual individual) {
+    public ResponseEntity<ApiResponse> updateIndividual(@PathVariable Integer id, @RequestBody @Valid Individual individual) {
         individualService.updateIndividual(id, individual);
         return ResponseEntity.status(200).body(new ApiResponse("Individual updated successfully"));
     }
@@ -60,7 +60,7 @@ public class IndividualController {
     }
 
     @PutMapping("/profile/update/{individualId}")
-    public ResponseEntity<ApiResponse> updateHealthProfile(@PathVariable Integer individualId, @RequestBody Profile profile) {
+    public ResponseEntity<ApiResponse> updateHealthProfile(@PathVariable Integer individualId, @RequestBody @Valid Profile profile) {
         healthProfileService.updateProfile(individualId, profile);
         return ResponseEntity.status(200).body(new ApiResponse("Health Profile updated successfully"));
     }

@@ -30,11 +30,11 @@ public class HabitController {
         return ResponseEntity.status(200).body(habitService.getChildHabits(childId));
     }
 
-    @PostMapping("/add-habit-individual") // تعديل المسمى ليكون دقيقاً وموجهاً للمستقل
+   /* @PostMapping("/add-habit-individual")
     public ResponseEntity<ApiResponse> addHabitIndividual(@RequestBody @Valid IndividualHabitDTO dto) {
         habitService.addHabitIndividual(dto);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
-    }
+    }*/
 
     @PostMapping("/add-habit-parent/{parentId}/{childId}")
     public ResponseEntity<ApiResponse> addHabitParent(@PathVariable Integer parentId,@PathVariable Integer childId, @RequestBody @Valid Habit habit) {
@@ -45,7 +45,7 @@ public class HabitController {
 
 
     @PutMapping("/update/{habitId}")
-    public ResponseEntity<ApiResponse> updateHabit(@PathVariable Integer habitId, @RequestBody IndividualHabitDTO dto) {
+    public ResponseEntity<ApiResponse> updateHabit(@PathVariable Integer habitId, @RequestBody @Valid IndividualHabitDTO dto) {
         habitService.updateHabit(habitId, dto);
         return ResponseEntity.status(200).body(new ApiResponse("Habit updated successfully"));
     }
@@ -57,9 +57,9 @@ public class HabitController {
     }
 
 
-    @PostMapping("/complete/{habitId}")
+    /*@PostMapping("/complete/{habitId}")
     public ResponseEntity<ApiResponse> completeHabitToday(@PathVariable Integer habitId) {
         habitService.completeHabitToday(habitId);
         return ResponseEntity.status(200).body(new ApiResponse("Habit executed and points credited successfully"));
-    }
+    }*/
 }
