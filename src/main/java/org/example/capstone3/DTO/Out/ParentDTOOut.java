@@ -1,4 +1,4 @@
-package org.example.capstone3.DTO.OUT;
+package org.example.capstone3.DTO.Out;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,5 +19,6 @@ import java.util.Set;
 public class ParentDTOOut {
 
     private String fullName;
-
+    private String email;
+    private String phoneNumber;
 }

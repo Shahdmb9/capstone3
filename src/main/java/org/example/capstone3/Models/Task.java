@@ -25,6 +25,7 @@ public class Task {
     private String description;
     @Column(columnDefinition = "varchar(20) not null CHECK (status IN ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'CANCELLED'))")
     private String status;
+    private String type;
     private Date startDate;
     private Date endDate;
 

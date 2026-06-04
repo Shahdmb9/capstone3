@@ -7,6 +7,8 @@ import org.example.capstone3.API.ApiResponse;
 import org.example.capstone3.DTO.In.ParentDTOIn;
 import org.example.capstone3.Models.Parent;
 import org.example.capstone3.Service.ParentService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +42,20 @@ public class ParentController {
         parentService.delete(id);
         return ResponseEntity.status(200).body(new ApiResponse("Parent deleted successfully"));
     }
+    @GetMapping("{id}/children-report/{period}")
+    public ResponseEntity<?> ChildrenPerformanceReport( @PathVariable Integer id , @PathVariable String period){
+        parentService.ChildrenPerformanceReport(id, period);
+        return ResponseEntity.status(200).body(new ApiResponse("Report sent successfully"));
+    }
+    @GetMapping("download/{id}/children-report/{period}")
+    public ResponseEntity<?> downloadChildrenPerformanceReport(@PathVariable Integer id ,@PathVariable String period){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("Children_Performance_Report", "Report.pdf");
+        return ResponseEntity.status(200).headers(headers).body(parentService.childrenPerformanceReport(id, period));
+    }
+
+
 
 
 }
