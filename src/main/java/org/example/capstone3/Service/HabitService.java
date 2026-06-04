@@ -108,15 +108,16 @@ public class HabitService {
         habitRepository.delete(habit);
     }
 
-    public void logHabit(Integer habitId) {
-        Habit habit = getHabitById(habitId);
+    public void logHabit(Integer habitLogId) {
+        HabitLog log = getHabitLogById(habitLogId);
+
+        Habit habit = getHabitById(log.getHabit().getId());
 
         // check if the habit is already logged for the current period if he's done a weekly habit, he can't do it again till the next week
         if (isAlreadyLoggedInPeriod(habit)!=null) {
             throw new RuntimeException("Habit already logged for this " + habit.getFrequency() + " period");
         }
 
-        HabitLog log = habitLogRepository.findHabitLogByHabit(habit);
         log.setLoggedDate(LocalDate.now());
 
         // Auto-approve if it's an individual habit (no parent needed)
@@ -124,10 +125,17 @@ public class HabitService {
         //if yes set completed status to pending if not approved
         log.setApprovalStatus(isChild ? "PENDING" : "COMPLETED");
 
+        habitLogRepository.save(log);
+
+
         // Give points without approval if not child
         if (!isChild) {
+            updateStreak(habit);
             Individual individual = habit.getIndividual();
             individual.setPoints(individual.getPoints() + habit.getPoints());
+            //call renad addign
+//            if(individual.getPoints()>habit.getPoints())
+
             individualRepository.save(individual);
         }
         else {
@@ -135,6 +143,67 @@ public class HabitService {
         }
 
          habitLogRepository.save(log);
+         habitRepository.save(habit); // ✅ persist streak changes
+
+    }
+
+    public void updateStreak(Habit habit) {
+        LocalDate today = LocalDate.now();
+
+        List<HabitLog> recentLogs = habitLogRepository
+                .findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
+
+        // Find the most recent log that is NOT today
+        LocalDate lastLogDate = null;
+        for (HabitLog log : recentLogs) {
+            if (log.getLoggedDate().isBefore(today)) {
+                lastLogDate = log.getLoggedDate();
+                break;
+            }
+        }
+
+        boolean streakContinues = false;
+        if (lastLogDate != null) {
+            streakContinues = isConsecutivePeriod(lastLogDate, today, habit.getFrequency());
+        }
+
+        if (streakContinues) {
+            habit.setStreak(habit.getStreak() + 1);
+        } else {
+            habit.setStreak(1);
+        }
+
+        if (habit.getStreak() > habit.getHighestStreak()) {
+            habit.setHighestStreak(habit.getStreak());
+        }
+    }
+
+    private boolean isConsecutivePeriod(LocalDate lastLog, LocalDate today, String frequency) {
+        switch (frequency.toUpperCase()) {
+            case "DAILY":
+                return lastLog.isEqual(today.minusDays(1));
+
+            case "WEEKLY":
+                LocalDate thisWeekStart = today.with(DayOfWeek.SUNDAY);
+                LocalDate lastWeekStart = thisWeekStart.minusWeeks(1);
+                LocalDate lastWeekEnd   = thisWeekStart.minusDays(1);
+                return !lastLog.isBefore(lastWeekStart) && !lastLog.isAfter(lastWeekEnd);
+
+            case "MONTHLY":
+                LocalDate thisMonthStart = today.withDayOfMonth(1);
+                LocalDate lastMonthStart = thisMonthStart.minusMonths(1);
+                LocalDate lastMonthEnd   = thisMonthStart.minusDays(1);
+                return !lastLog.isBefore(lastMonthStart) && !lastLog.isAfter(lastMonthEnd);
+
+            case "YEARLY":
+                LocalDate thisYearStart = today.withDayOfYear(1);
+                LocalDate lastYearStart = thisYearStart.minusYears(1);
+                LocalDate lastYearEnd   = thisYearStart.minusDays(1);
+                return !lastLog.isBefore(lastYearStart) && !lastLog.isAfter(lastYearEnd);
+
+            default:
+                return false;
+        }
     }
 
 
@@ -171,8 +240,11 @@ public class HabitService {
             Child child = log.getHabit().getChild();
             if (child != null) {
                 child.setPoints(child.getPoints() + log.getHabit().getPoints());
+                //call recall renad
                 childRepository.save(child);
             }
+//            updateStreak(log.getHabit());
+            habitRepository.save(log.getHabit());
         }
 
     }
@@ -185,28 +257,6 @@ public class HabitService {
         return log;
     }
 
-//    public void completeHabitToday(Integer habitId) {
-//        Habit habit = habitRepository.findHabitById(habitId);
-//        if (habit == null) {
-//            throw new ApiException("Habit not found");
-//        }
-//
-//        HabitLog existingLog = habitLogRepository.findByHabitIdAndLoggedDate(habitId, LocalDate.now());
-//        if (existingLog != null) {
-//            throw new ApiException("Habit already executed today");
-//        }
-//
-//        HabitLog log = new HabitLog();
-//        log.setHabit(habit);
-//        log.setLoggedDate(LocalDate.now());
-//        log.setApprovalStatus("APPROVED");
-//        log.setApprovedAt(LocalDate.now());
-//        habitLogRepository.save(log);
-//
-//        Individual individual = habit.getIndividual();
-//        individual.setPoints(individual.getPoints() + habit.getPoints());
-//        individualRepository.save(individual);
-//    }
 
     //extra
 
@@ -266,7 +316,7 @@ public class HabitService {
     public HabitLog isAlreadyLoggedInPeriod(Habit habit) {
         LocalDate now   = LocalDate.now();
         LocalDate start = getPeriodStart(now, habit.getFrequency());
-        return habitLogRepository.findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(habit.getId(), start, now, "APPROVED");
+        return habitLogRepository.findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(habit.getId(), start, now, "COMPLETED");
     }
 
     public LocalDate getPeriodStart(LocalDate date, String frequency) {

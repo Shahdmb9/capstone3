@@ -25,6 +25,13 @@ public class Habit {
     @Column(columnDefinition = "text")
     private String description;
 
+
+    @Column(columnDefinition = "INT")
+    private int streak;
+
+    @Column(columnDefinition = "INT")
+    private int highestStreak;
+
     @Column(columnDefinition = "varchar(20)", nullable = false)
     @NotBlank(message = "Frequency is required")
     @Pattern(regexp = "^(DAILY|WEEKLY|MONTHLY)$", message = "Frequency must be either DAILY, WEEKLY, or MONTHLY")
