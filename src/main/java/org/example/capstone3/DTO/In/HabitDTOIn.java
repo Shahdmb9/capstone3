@@ -20,9 +20,9 @@ public class HabitDTOIn {
     private String frequency;
 
     @Min(1)
-    private Integer points = 10;
+    private Integer points;
 
-    private Boolean isAiSuggested = false;
+    private Boolean isAiSuggested;
 
 
     private Integer individualId;
