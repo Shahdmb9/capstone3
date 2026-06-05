@@ -35,7 +35,6 @@ public class RewardService {
 
     public void add(Integer parentId, Integer habitId, RewardDTOIn rewardIn) {
         Parent parent = parentRepository.findParentById(parentId);
-        Reward reward = modelMapper.map(rewardIn,Reward.class);
         if (parent == null) throw new ApiException("Parent not found");
 
         Habit habit = habitRepository.findHabitById(habitId);
@@ -45,13 +44,22 @@ public class RewardService {
             throw new ApiException("This habit already has a reward linked to it");
         }
 
-        reward.setParent(parent);
-        reward.setHabit(habit);
-        reward.setId(habit.getId());
+        Reward reward = modelMapper.map(rewardIn, Reward.class);
 
+        // 1. ربط العلاقة المتبادلة بالاتجاهين بدقة في الذاكرة
+        reward.setHabit(habit);
+        reward.setParent(parent);
+
+        // 2. حشو الجائزة داخل العادة (الأب)
         habit.setReward(reward);
-        rewardRepository.save(reward);
+
+        // 3. 🎯 الحل الجذري: حفظ كائن الـ Habit وهو سيتكفل بحفظ الـ Reward وتوليد الـ ID تلقائياً
+        habitRepository.save(habit);
     }
+
+
+
+
 
     public void update(Integer id,RewardDTOIn rewardIn){
         Reward reward = modelMapper.map(rewardIn,Reward.class);
