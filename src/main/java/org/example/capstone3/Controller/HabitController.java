@@ -59,10 +59,12 @@ public class HabitController {
         return ResponseEntity.status(200).body(new ApiResponse("Habit deleted successfully"));
     }
 
+    /*
     @GetMapping("/get-ind-hapits-streak/{individualId}")
     public ResponseEntity<?> getIndividualHabit(@PathVariable Integer individualId) {
         return ResponseEntity.status(200).body(this.habitService.IndividualStreakPerHabit(individualId));
     }
+    */
 
     @PutMapping("/complete-habit/{habitId}")
     public ResponseEntity<ApiResponse> completeHabit(@PathVariable Integer habitId) {
@@ -76,9 +78,25 @@ public class HabitController {
         return ResponseEntity.status(200).body(new ApiResponse("Habit reviewed and updated successfully"));
     }
 
+    @GetMapping("/ai-habits/{individualId}")
+    public ResponseEntity<?> generateHabits(@PathVariable Integer individualId){
+        return ResponseEntity.status(200).body(this.habitService.generateHabits(individualId));
+    }
+
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<?> getHabitsByCategory(@PathVariable Integer categoryId) {
         return ResponseEntity.status(200).body(habitService.getHabitsByCategory(categoryId));
+    }
+
+    @PutMapping("/accept-habit-suggested/{individualId}/{habitId}")
+    public ResponseEntity<?> acceptHabitSuggestedByAI(@PathVariable Integer individualId, @PathVariable Integer habitId){
+        habitService.acceptHabitSuggestedByAI(individualId, habitId);
+        return ResponseEntity.status(200).body(new ApiResponse("Habit accepted successfully"));
+    }
+
+    @GetMapping("/get-ai-habit-suggested/{individualId}")
+    public ResponseEntity<?> getAiSuggested(@PathVariable Integer individualId){
+        return ResponseEntity.status(200).body(habitService.AISuggestedHabit(individualId));
     }
 
     @GetMapping("/ia_risk_prediction/{id}")
