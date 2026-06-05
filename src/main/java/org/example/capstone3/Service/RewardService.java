@@ -46,14 +46,11 @@ public class RewardService {
 
         Reward reward = modelMapper.map(rewardIn, Reward.class);
 
-        // 1. ربط العلاقة المتبادلة بالاتجاهين بدقة في الذاكرة
         reward.setHabit(habit);
         reward.setParent(parent);
 
-        // 2. حشو الجائزة داخل العادة (الأب)
         habit.setReward(reward);
 
-        // 3. 🎯 الحل الجذري: حفظ كائن الـ Habit وهو سيتكفل بحفظ الـ Reward وتوليد الـ ID تلقائياً
         habitRepository.save(habit);
     }
 
