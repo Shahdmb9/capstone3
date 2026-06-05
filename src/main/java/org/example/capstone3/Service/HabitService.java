@@ -6,14 +6,14 @@ import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.IndividualHabitDTO;
 import org.example.capstone3.Models.*;
 import org.example.capstone3.Repository.*;
-\import org.springframework.scheduling.annotation.Scheduled;
+import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-
 @Service
 @RequiredArgsConstructor
 public class HabitService {
@@ -28,6 +28,7 @@ public class HabitService {
     private final WhatsAppService whatsAppService;
     private final AiService aiService;
     private final BadgeService badgeService;
+    private final ModelMapper modelMapper;
 
     @Scheduled(cron = "0 0 0 * * *")
     public void evaluateHabitsDaily() {
@@ -37,6 +38,7 @@ public class HabitService {
             habitLogRepository.save(log);
         }
     }
+
 
     public List<Habit> getIndividualHabits(Integer individualId) {
         return habitRepository.findHabitByIsAiSuggestedFalseAndIndividualId(individualId);
