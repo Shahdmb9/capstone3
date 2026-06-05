@@ -35,7 +35,6 @@ public class RewardService {
 
     public void add(Integer parentId, Integer habitId, RewardDTOIn rewardIn) {
         Parent parent = parentRepository.findParentById(parentId);
-        Reward reward = modelMapper.map(rewardIn,Reward.class);
         if (parent == null) throw new ApiException("Parent not found");
 
         Habit habit = habitRepository.findHabitById(habitId);
@@ -45,13 +44,19 @@ public class RewardService {
             throw new ApiException("This habit already has a reward linked to it");
         }
 
-        reward.setParent(parent);
+        Reward reward = modelMapper.map(rewardIn, Reward.class);
+
         reward.setHabit(habit);
-        reward.setId(habit.getId());
+        reward.setParent(parent);
 
         habit.setReward(reward);
-        rewardRepository.save(reward);
+
+        habitRepository.save(habit);
     }
+
+
+
+
 
     public void update(Integer id,RewardDTOIn rewardIn){
         Reward reward = modelMapper.map(rewardIn,Reward.class);

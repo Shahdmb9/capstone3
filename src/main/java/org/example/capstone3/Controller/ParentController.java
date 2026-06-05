@@ -83,6 +83,12 @@ public class ParentController {
         return ResponseEntity.status(200).body(parentService.getPendingHabit(parentId));
     }
 
+    @GetMapping("/{parentId}/family-discipline-score")
+    public ResponseEntity<String> getFamilyDisciplineScore(@PathVariable Integer parentId) {
+        return ResponseEntity.status(200).body(parentService.FamilyDisciplineScore(parentId));
+    }
+
+
 
 
 

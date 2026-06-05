@@ -64,7 +64,7 @@ public class Habit {
     @OneToMany(mappedBy = "habit", cascade = CascadeType.ALL)
     private Set<HabitLog> logs;
 
-    @OneToOne(mappedBy = "habit",cascade = CascadeType.ALL)
-    @JsonIgnore
+    @OneToOne(mappedBy = "habit", cascade = CascadeType.ALL)
     private Reward reward;
+
 }
