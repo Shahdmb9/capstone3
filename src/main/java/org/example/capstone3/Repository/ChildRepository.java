@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChildRepository extends JpaRepository<Child, Integer> {
     Child findChildById(Integer id);
-    Child findChildByEmail(String email);
 }
 

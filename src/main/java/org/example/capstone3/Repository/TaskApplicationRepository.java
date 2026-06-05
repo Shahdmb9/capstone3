@@ -8,7 +8,6 @@ import java.util.List;
 
 @Repository
 public interface TaskApplicationRepository extends JpaRepository<TaskApplication, Integer> {
-    TaskApplication findTaskApplicationById(Integer id);
 
     List<TaskApplication> findByTaskIdAndChildId(Integer taskId, Integer childId);
 }

@@ -18,7 +18,6 @@ public class TaskApplicationService {
     private final ChildRepository childRepository;
     private final TaskRewardRepository taskRewardRepository;
 
-    // 1. الابن يسجل أنه أنهى التحدي الجماعي أولاً (Create Log)
     public void childApplyForTask(Integer childId, Integer taskId) {
         Child child = childRepository.findChildById(childId);
         if (child == null) throw new ApiException("Child not found");
@@ -30,7 +29,6 @@ public class TaskApplicationService {
             throw new ApiException("Task is already closed or completed");
         }
 
-        // منع الطفل من التقديم مرتين على نفس التحدي الجماعي
         List<TaskApplication> existing = taskApplicationRepository.findByTaskIdAndChildId(taskId, childId);
         if (!existing.isEmpty()) {
             throw new ApiException("You have already submitted an application for this task");
@@ -39,13 +37,12 @@ public class TaskApplicationService {
         TaskApplication app = new TaskApplication();
         app.setTask(task);
         app.setChild(child);
-        app.setApprovalStatus("PENDING"); // معلق بانتظار حسم الأب
+        app.setApprovalStatus("PENDING");
         app.setLoggedDate(LocalDate.now());
 
         taskApplicationRepository.save(app);
     }
 
-    // 2. الأب يوافق على الابن الأسرع، يمنحه الجائزة الكبرى، ويقفل التحدي أمام البقية (Update & Lock)
     public void parentApproveTaskWinner(Integer applicationId, String action) { // action: APPROVED أو REJECTED
         TaskApplication app = taskApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ApiException("Application not found"));
@@ -59,9 +56,8 @@ public class TaskApplicationService {
         if (action.equalsIgnoreCase("APPROVED")) {
             app.setApprovalStatus("APPROVED");
             app.setApprovedAt(LocalDate.now());
-            task.setStatus("COMPLETED"); // إغلاق التحدي الجماعي كاملاً لحسم الفائز أولاً
+            task.setStatus("COMPLETED");
 
-            // تفعيل حالة الجائزة الكبرى وتثبيت تاريخ الاستحقاق الفوري للطفل الفائز
             TaskReward reward = task.getTaskReward();
             if (reward != null) {
                 reward.setStatus("COMPLETED");

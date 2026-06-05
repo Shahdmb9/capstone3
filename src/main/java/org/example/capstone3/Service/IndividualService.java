@@ -10,6 +10,8 @@ import org.example.capstone3.Repository.IndividualRepository;
 import org.example.capstone3.Repository.ParentRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -21,6 +23,10 @@ public class IndividualService {
     private  final ModelMapper modelMapper;
     private final AiService aiService;
     private final HabitLogRepository habitLogRepository;
+    private final CreatePdfService createPdfService;
+    private final EmailService emailService;
+    private final WhatsAppService whatsAppService;
+
 
     public List<Individual> getAllIndividuals() {
         return individualRepository.findAll();
@@ -75,10 +81,7 @@ public class IndividualService {
         individualRepository.save(individual);
     }
 
-
-
-    //  اقتراح عادات بناءً على اهتمامات الشخص المستقل
-    public String getAiHabitRecommendations(Integer individualId) {
+    public String recommendHabitsByInterests(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
 
@@ -86,27 +89,84 @@ public class IndividualService {
         for (Category cat : individual.getCategories()) {
             categoriesStr.append(cat.getName()).append(", ");
         }
-        if (categoriesStr.isEmpty()) throw new ApiException("Please add interests first");
 
-        String prompt = "Suggest 3 habits for categories: [" + categoriesStr + "]. Return JSON array with title, description, frequency, points.";
+        if (categoriesStr.isEmpty()) {
+            throw new ApiException("Please add interests/categories to your profile first");
+        }
+
+        String prompt = "The user is interested in these categories: [" + categoriesStr + "].\n" +
+                "Suggest 3 actionable habits. For each habit, provide: title, description, frequency (must be DAILY, WEEKLY, or MONTHLY), and suggested points (Integer).\n" +
+                "Respond ONLY with a valid raw JSON array of objects. Example format:\n" +
+                "[{\"title\": \"Read Quran\", \"description\": \"Read 5 pages daily\", \"frequency\": \"DAILY\", \"points\": 15}]";
 
         return aiService.callClaudeApi(prompt);
     }
 
-    //  بناء خطة هدف ذكية مخصصة بناءً على الملف الصحي للشخص
-    public String getAiGoalPlan(Integer individualId, String userGoal) {
+    public String generateGoalPlan(Integer individualId, String userGoal) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
 
         Profile profile = individual.getProfile();
         if (profile == null) throw new ApiException("Please complete your health profile first");
 
-        String prompt = "Goal: " + userGoal + ". User Age: " + profile.getAge() + ", Weight: " + profile.getWeight() + ". Generate structured JSON plan.";
+        StringBuilder currentHabits = new StringBuilder();
+        for (Habit h : individual.getHabits()) {
+            currentHabits.append("- ").append(h.getTitle()).append("\n");
+        }
+
+        String prompt = "User Goal: \"" + userGoal + "\"\n" +
+                "User Profile Details:\n" +
+                "- Age: " + profile.getAge() + "\n" +
+                "- Weight: " + profile.getWeight() + " kg\n" +
+                "- Height: " + profile.getHeight() + " cm\n" +
+                "- Medical Conditions: " + profile.getMedicalConditions() + "\n" +
+                "- Bad Habits to break: " + profile.getBadHabit() + "\n\n" +
+                "Current Active Habits:\n" + currentHabits + "\n" +
+                "Generate a structured fitness/lifestyle plan tailored strictly to these metrics. Provide a JSON object containing:\n" +
+                "1. 'summary': 2-3 sentences explaining the strategy.\n" +
+                "2. 'recommendedHabits': Array of new habits to add (title, description, frequency).\n" +
+                "3. 'warnings': Any health/medical precautions based on their profile.\n" +
+                "Respond ONLY with raw JSON.";
 
         return aiService.callClaudeApi(prompt);
     }
 
-    //  Badge Progress Advisor ( الشارات القادمة وكم باقي عليها)
+
+    public String getAchievementIndex(Integer individualId, String period) {
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual == null) throw new ApiException("Individual not found");
+
+        LocalDate now = LocalDate.now();
+        LocalDate startDate;
+
+        if ("week".equalsIgnoreCase(period)) startDate = now.minusDays(7);
+        else if ("month".equalsIgnoreCase(period)) startDate = now.minusMonths(1);
+        else startDate = now.minusYears(1);
+
+        int totalLogs = 0;
+        int completedLogs = 0;
+
+        for (Habit habit : individual.getHabits()) {
+            List<HabitLog> logs = habitLogRepository.findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(
+                    habit.getId(), startDate, now, "COMPLETED");
+            completedLogs += logs.size();
+
+            totalLogs += ("week".equalsIgnoreCase(period)) ? 7 : 30;
+        }
+
+        double completionRate = (totalLogs == 0) ? 0.0 : ((double) completedLogs / totalLogs) * 100;
+
+        String prompt = "The user completed " + completedLogs + " habit logs in the past " + period + ".\n" +
+                "Actual Completion Rate: " + String.format("%.2f", completionRate) + "%.\n" +
+                "Please evaluate this performance and respond ONLY with a raw JSON object containing:\n" +
+                "1. 'score': Performance score out of 100.\n" +
+                "2. 'evaluation': Clear assessment of their commitment (2 sentences).\n" +
+                "3. 'motivationalMessage': A custom personalized psychological boost or warning based on their score.\n" +
+                "Respond ONLY with raw JSON.";
+
+        return aiService.callClaudeApi(prompt);
+    }
+
     public String getBadgeProgressAdvisor(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
@@ -130,23 +190,25 @@ public class IndividualService {
         return aiService.callClaudeApi(prompt);
     }
 
-    //  Smart Habit Roadmap (خريطة طريق العادات المقترحة )
+
+
     public String getSmartHabitRoadmap(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
-        if (individual == null) throw new ApiException("Individual not found");
+        if (individual == null) {
+            throw new ApiException("Individual not found");
+        }
 
         Profile profile = individual.getProfile();
         String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
 
-        String prompt = "The user has the final goal: \"" + mainGoal + "\".\n" +
-                "Create a long-term 'Smart Habit Roadmap' divided into progressive phases. For each phase, suggest specific habits, category, frequency, duration (e.g., '21 days'), and expected points.\n" +
-                "Respond ONLY with a valid raw JSON object containing:\n" +
-                "1. 'finalGoal': \"" + mainGoal + "\"\n" +
-                "2. 'phases': Array of objects (phaseName, focus, recommendedHabits [array of objects with title, description, category, frequency, duration, expectedPoints]).\n" +
-                "Respond ONLY with raw JSON.";
+        String prompt = "Create a long-term 'Smart Habit Roadmap' divided into progressive phases for goal: \"" + mainGoal + "\" in JSON object format. " +
+                "Provide specific habits, category, frequency, duration, and expected points for each phase.";
 
         return aiService.callClaudeApi(prompt);
     }
+
+
+
 
 
 
