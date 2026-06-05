@@ -5,12 +5,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiResponse;
 import org.example.capstone3.DTO.In.ParentDTOIn;
-import org.example.capstone3.Models.Parent;
+import org.example.capstone3.Models.HabitLog;
 import org.example.capstone3.Service.ParentService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -64,6 +66,21 @@ public class ParentController {
     public ResponseEntity<?> deductChildPoint(@PathVariable Integer parentId,@PathVariable Integer childId,@PathVariable Integer poits) {
         parentService.deductChildPoint(parentId, childId, poits);
         return ResponseEntity.status(200).body(new ApiResponse("Points deducted successfully"));
+    }
+
+    @GetMapping("/{parentId}/children/{childId}/ai/behavior")
+    public ResponseEntity<String> getChildBehaviorAnalysis(@PathVariable Integer parentId, @PathVariable Integer childId) {
+        return ResponseEntity.status(200).body(parentService.getChildBehaviorAnalysis(parentId, childId));
+    }
+
+    @GetMapping("/{parentId}/children/{childId}/ai/recommended-rewards")
+    public ResponseEntity<String> recommendChildRewards(@PathVariable Integer parentId, @PathVariable Integer childId) {
+        return ResponseEntity.status(200).body(parentService.recommendChildRewards(parentId, childId));
+    }
+
+    @GetMapping("/{parentId}/pending-habits")
+    public ResponseEntity<List<HabitLog>> getPendingHabit(@PathVariable Integer parentId) {
+        return ResponseEntity.status(200).body(parentService.getPendingHabit(parentId));
     }
 
 

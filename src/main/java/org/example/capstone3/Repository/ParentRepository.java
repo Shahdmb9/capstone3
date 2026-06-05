@@ -9,6 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface ParentRepository extends JpaRepository<Parent, Integer> {
     @Query("SELECT p FROM Parent p WHERE p.id = ?1")
     Parent findParentById(Integer id);
-    Parent findParentByEmail(String email);
 }
 

@@ -53,9 +53,6 @@ public class RewardService {
         rewardRepository.save(reward);
     }
 
-
-
-
     public void update(Integer id,RewardDTOIn rewardIn){
         Reward reward = modelMapper.map(rewardIn,Reward.class);
         Reward oldReward=getRewardById(id);
@@ -93,8 +90,12 @@ public class RewardService {
 
         child.setPoints(child.getPoints() - reward.getRequiredPoints());
 
+        reward.setClaimedAt(java.time.LocalDateTime.now());
+
         childRepository.save(child);
+        rewardRepository.save(reward);
     }
+
 
 
 }

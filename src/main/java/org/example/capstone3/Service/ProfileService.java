@@ -36,7 +36,7 @@ public class ProfileService {
             throw new ApiException("Individual not found");
         }
 
-        Profile existingProfile = profileRepository.findProfileById(individualId);
+        Profile existingProfile = profileRepository.findProfileByIndividualId(individualId);
         if (existingProfile != null) {
             throw new ApiException("Health Profile already exists for this individual");
         }
@@ -46,7 +46,7 @@ public class ProfileService {
     }
 
     public void updateProfile(Integer individualId, Profile newProfile) {
-        Profile oldProfile = profileRepository.findProfileById(individualId);
+        Profile oldProfile = profileRepository.findProfileByIndividualId(individualId);
         if (oldProfile == null) {
             throw new ApiException("Profile not found");
         }
@@ -67,7 +67,7 @@ public class ProfileService {
     }
 
     public void deleteProfile(Integer individualId) {
-        Profile profile = profileRepository.findProfileById(individualId);
+        Profile profile = profileRepository.findProfileByIndividualId(individualId);
         if (profile == null) {
             throw new ApiException("Profile not found");
         }
