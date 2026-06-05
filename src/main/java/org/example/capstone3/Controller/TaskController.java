@@ -38,7 +38,6 @@ public class TaskController {
         taskService.deleteTask(id);
         return ResponseEntity.status(200).body(new ApiResponse("task deleted successfully"));
     }
-    // 1. أضيفي حقل الحقن في أعلى الكلاس بجانب بقية الخدمات:
     private final org.example.capstone3.Service.TaskApplicationService taskApplicationService;
 
 

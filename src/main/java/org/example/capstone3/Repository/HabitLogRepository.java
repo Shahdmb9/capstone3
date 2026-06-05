@@ -13,7 +13,7 @@ public interface HabitLogRepository extends JpaRepository<HabitLog, Integer> {
 
     HabitLog findHabitLogById(Integer id);
 
-    HabitLog findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(Integer habitId, LocalDate start, LocalDate end, String status);
+    List<HabitLog> findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(Integer habitId, LocalDate start, LocalDate end, String status);
 
     HabitLog findHabitLogsByCreatedAt(LocalDate date);
 

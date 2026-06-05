@@ -18,7 +18,7 @@ public class HabitLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ")
+    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ",insertable = false)
     private LocalDate loggedDate = LocalDate.now();
 
     @Column(columnDefinition = "varchar(20)", nullable = false)

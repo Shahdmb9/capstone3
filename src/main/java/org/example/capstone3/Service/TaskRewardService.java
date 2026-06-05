@@ -17,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+
 public class TaskRewardService {
     private final TaskRewardRepository taskRewardRepository;
     private final TaskRepository taskRepository;
@@ -30,19 +31,30 @@ public class TaskRewardService {
         return taskRewardDTOOuts;
     }
 
-    public void addTaskReward(Integer parentId,Integer taskID, TaskRewardDTOIn taskRewardDTOIn) {
+    public void addTaskReward(Integer parentId, Integer taskID, TaskRewardDTOIn taskRewardDTOIn) {
         Task task = taskRepository.findTaskById(taskID);
         if (task == null) {
             throw new ApiException("Task not found");
         }
-        Parent parent=task.getParent();
+
+        Parent parent = task.getParent();
 
         if (task.getTaskReward() != null) {
-            throw new ApiException("task already has a reward");
+            throw new ApiException("Task already has a reward");
         }
-        TaskReward taskReward = new TaskReward(taskID, taskRewardDTOIn.getTitle(), taskRewardDTOIn.getDescription(), "IN_PROGRESS", null, task,parent);
+
+        TaskReward taskReward = new TaskReward();
+        taskReward.setTitle(taskRewardDTOIn.getTitle());
+        taskReward.setDescription(taskRewardDTOIn.getDescription());
+        taskReward.setStatus("IN_PROGRESS");
+        taskReward.setParent(parent);
+
+        taskReward.setTask(task);
+        task.setTaskReward(taskReward);
+
         taskRewardRepository.save(taskReward);
     }
+
 
     public void updateTaskReward(Integer taskID, TaskRewardDTOIn taskRewardDTOIn) {
         Task task = taskRepository.findTaskById(taskID);
