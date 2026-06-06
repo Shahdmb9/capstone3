@@ -7,32 +7,36 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 
 # HABIT SYSTEM ENDPOINTS (CAPSTONE 3)
 
-### 1-Individual Path 
+
+### 1-Parent 
 
 | HTTP Method | API Path |
 | :--- | :--- |
-| `PUT` | `/api/v1/individual/add-interest/{individualId}/{categoryId}` |
-| `POST` | `/api/v1/individual/{individualId}/ai/generate-plan` |
-| `GET` | `/api/v1/individual/{individualId}/ai/achievement-index` |
-| `GET` | `/api/v1/individual/{individualId}/ai/badges-progress` |
+| `GET` | `/api/v1/parent/{id}/children-report/{period}` |
+| `GET` | `/api/v1/parent/download/{id}/children-report/{period}` |
+| `GET` | `/api/v1/parent/family_discipline_score/{id}` |
+| `GET` | `/api/v1/parent/family_activity/{id}/{city}` |
+| `GET` | `/api/v1/parent/leaderboard/{id}` |
 
 
-### 2-Parent 
-
-| HTTP Method | API Path |
-| :--- | :--- |
-| `GET` | `/api/v1/parent/{parentId}/pending-habits` |
-| `GET` | `/api/v1/parent/{parentId}/children/{childId}/ai/behavior` |
-| `GET` | `/api/v1/parent/{parentId}/children/{childId}/ai/recommended-rewards` |
-
-
-### 3-Habit
+### 2-Habit
 
 | HTTP Method | API Path |
 | :--- | :--- |
-| `PUT` | `/api/v1/habit/complete-habit/{habitId}` |
-| `PUT` | `/api/v1/habit/review-log-of-child/{parentId}/{habitId}/{status}` |
-| `GET` | `/api/v1/habit/{habitId}/ai/improvement` |
-| `GET` | `/api/v1/habit/{habitId}/ai/commitment` |
-
-
+| `GET` | `/api/v1/habit/ia_risk_prediction/{id}` |
+| `GET` | `/api/v1/habit/ia_best_habit_time/{id}` |
+ 
+### 3 - Task (Reenad)
+ 
+| HTTP Method | API Path |
+| :--- | :--- |
+| `POST` | `/api/v1/task/apply/{childId}/{taskId}` |
+| `PUT` | `/api/v1/task/approve/{applicationId}/{action}` |
+| `GET` | `/api/v1/task/parent-pending/{parentId}` |
+ 
+### 4 - Task Reward (Reenad)
+ 
+| HTTP Method | API Path |
+| :--- | :--- |
+| `POST` | `/api/v1/task-reward/add/{parentId}/{taskId}` |
+ 
