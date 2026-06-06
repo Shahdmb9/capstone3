@@ -3,6 +3,7 @@ package org.example.capstone3.Models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -20,9 +21,11 @@ public class Habit {
     private Integer id;
 
     @Column(columnDefinition = "varchar(100)", nullable = false)
+    @NotEmpty(message = "Title cannot be empty")
     private String title;
 
     @Column(columnDefinition = "text")
+    @NotEmpty(message = "Description cannot be empty")
     private String description;
 
 
@@ -33,12 +36,11 @@ public class Habit {
     private Integer highestStreak;
 
     @Column(columnDefinition = "varchar(20)", nullable = false)
-    @NotBlank(message = "Frequency is required")
-    @Pattern(regexp = "^(DAILY)$", message = "Frequency must be DAILY")
-    private String frequency = "DAILY";
-
+    @Pattern(regexp = "^(DAILY)$", message = "Frequency must be either DAILY")
+    private String frequency;
 
     @Column(nullable = false)
+    @NonNull
     private Integer points = 10;
 
     private Boolean isAiSuggested = false;
@@ -49,7 +51,7 @@ public class Habit {
     private Individual individual;
 
     @ManyToOne
-    @JoinColumn(name = "parent_id", referencedColumnName = "id")
+    @JoinColumn(name = "parent_id", referencedColumnName = "id")//optional
     @JsonIgnore
     private Parent parent;
 

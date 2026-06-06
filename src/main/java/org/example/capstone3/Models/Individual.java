@@ -24,13 +24,13 @@ public class Individual {
     @Column(columnDefinition = "varchar(50)", nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "varchar(50)",nullable = false)
     private String password;
 
-    @Column(columnDefinition = "varchar(20)")
+    @Column(columnDefinition = "varchar(20)",nullable = false)
     private String phoneNumber;
 
-    @Column(columnDefinition = "int default 0")
+    @Column(columnDefinition = "int default 0",nullable = false)
     private Integer points = 0;
 
     @OneToOne(mappedBy = "individual", cascade = CascadeType.ALL)
@@ -46,6 +46,7 @@ public class Individual {
             joinColumns = @JoinColumn(name = "individual_id"),
             inverseJoinColumns = @JoinColumn(name = "badge_id")
     )
+    @JsonIgnore
     private Set<Badge> badges = new HashSet<>();
 
 
