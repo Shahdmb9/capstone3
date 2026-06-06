@@ -7,7 +7,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 
 # HABIT SYSTEM ENDPOINTS (CAPSTONE 3)
 
-### 1-Individual Path 
+### 1-Individual  
 
 | HTTP Method | API Path |
 | :--- | :--- |
