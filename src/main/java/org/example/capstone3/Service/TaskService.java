@@ -26,7 +26,6 @@ public class TaskService {
     public List<Task> getAllTask(){
         return taskRepository.findAll();
     }
-
     public void addTask(Integer parentId, TaskDTOIn taskIn) {
         Parent parent = parentRepository.findParentById(parentId);
         if (parent == null) throw new ApiException("Parent not found");
