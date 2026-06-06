@@ -12,7 +12,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 
 | HTTP Method | API Path |
 | :--- | :--- |
-| `PUT` | `/api/v1/habit/complete-habit/{habitId}` |
+| `PUT` | `/api/v1/habit/complete-habit/{habitLogId}` |
 | `PUT` | `/api/v1/habit/review-log-of-child/{parentId}/{habitId}/{status}` |
 | `GET` | `/api/v1/habit/category/{categoryId}` |
 | `GET` | `/api/v1/habit/get-today-habits-Individual/{id}` |
