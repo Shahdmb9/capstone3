@@ -83,27 +83,6 @@ public class IndividualService {
         individualRepository.save(individual);
     }
 
-    public String recommendHabitsByInterests(Integer individualId) {
-        Individual individual = individualRepository.findIndividualById(individualId);
-        if (individual == null) throw new ApiException("Individual not found");
-
-        StringBuilder categoriesStr = new StringBuilder();
-        for (Category cat : individual.getCategories()) {
-            categoriesStr.append(cat.getName()).append(", ");
-        }
-
-        if (categoriesStr.isEmpty()) {
-            throw new ApiException("Please add interests/categories to your profile first");
-        }
-
-        String prompt = "The user is interested in these categories: [" + categoriesStr + "].\n" +
-                "Suggest 3 actionable habits. For each habit, provide: title, description, frequency (must be DAILY, WEEKLY, or MONTHLY), and suggested points (Integer).\n" +
-                "Respond ONLY with a valid raw JSON array of objects. Example format:\n" +
-                "[{\"title\": \"Read Quran\", \"description\": \"Read 5 pages daily\", \"frequency\": \"DAILY\", \"points\": 15}]";
-
-        return aiService.callClaudeApi(prompt);
-    }
-
     public String generateGoalPlan(Integer individualId, String userGoal) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
