@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface HabitLogRepository extends JpaRepository<HabitLog, Integer> {
@@ -13,9 +14,15 @@ public interface HabitLogRepository extends JpaRepository<HabitLog, Integer> {
 
     HabitLog findHabitLogById(Integer id);
 
-    HabitLog findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(Integer habitId, LocalDate start, LocalDate end, String status);
+    List<HabitLog> findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(Integer habitId, LocalDate start, LocalDate end, String status);
 
     HabitLog findHabitLogsByCreatedAt(LocalDate date);
+
+    HabitLog findByHabitAndCreatedAt(Habit habit, LocalDate CreatedAt);
+
+
+    // All logs for a given date across multiple habits — used to fetch today's full list
+//    List<HabitLog> findByHabitInAndLoggedDate(Set<Habit> habits, LocalDate loggedDate);
 
     HabitLog findHabitLogByHabit(Habit habit);
 

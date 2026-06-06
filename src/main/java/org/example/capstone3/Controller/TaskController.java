@@ -3,11 +3,14 @@ package org.example.capstone3.Controller;
 
 import org.example.capstone3.API.ApiResponse;
 import org.example.capstone3.DTO.In.TaskDTOIn;
+import org.example.capstone3.Models.TaskApplication;
 import org.example.capstone3.Service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/task")
@@ -38,7 +41,6 @@ public class TaskController {
         taskService.deleteTask(id);
         return ResponseEntity.status(200).body(new ApiResponse("task deleted successfully"));
     }
-    // 1. أضيفي حقل الحقن في أعلى الكلاس بجانب بقية الخدمات:
     private final org.example.capstone3.Service.TaskApplicationService taskApplicationService;
 
 
@@ -53,5 +55,10 @@ public class TaskController {
         taskApplicationService.parentApproveTaskWinner(applicationId, action);
         return ResponseEntity.status(200).body(new ApiResponse("Application processed. Winner verified and prize claimed"));
     }
+    @GetMapping("/parent-pending/{parentId}")
+    public ResponseEntity<List<TaskApplication>> getParentPendingTasks(@PathVariable Integer parentId) {
+        return ResponseEntity.status(200).body(taskApplicationService.getPendingApplicationsForParent(parentId));
+    }
+
 
 }

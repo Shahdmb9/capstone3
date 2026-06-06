@@ -3,14 +3,15 @@ package org.example.capstone3.Service;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.In.IndividualDTOIn;
+import org.example.capstone3.DTO.Out.BadgeDTOOut;
 import org.example.capstone3.Models.*;
-import org.example.capstone3.Repository.CategoryRepository;
-import org.example.capstone3.Repository.HabitLogRepository;
-import org.example.capstone3.Repository.IndividualRepository;
-import org.example.capstone3.Repository.ParentRepository;
+import org.example.capstone3.Repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,11 @@ public class IndividualService {
     private  final ModelMapper modelMapper;
     private final AiService aiService;
     private final HabitLogRepository habitLogRepository;
+    private final CreatePdfService createPdfService;
+    private final EmailService emailService;
+    private final WhatsAppService whatsAppService;
+    private final BadgeRepository badgeRepository;
+
 
     public List<Individual> getAllIndividuals() {
         return individualRepository.findAll();
@@ -75,38 +81,71 @@ public class IndividualService {
         individualRepository.save(individual);
     }
 
-
-
-    //  اقتراح عادات بناءً على اهتمامات الشخص المستقل
-    public String getAiHabitRecommendations(Integer individualId) {
-        Individual individual = individualRepository.findIndividualById(individualId);
-        if (individual == null) throw new ApiException("Individual not found");
-
-        StringBuilder categoriesStr = new StringBuilder();
-        for (Category cat : individual.getCategories()) {
-            categoriesStr.append(cat.getName()).append(", ");
-        }
-        if (categoriesStr.isEmpty()) throw new ApiException("Please add interests first");
-
-        String prompt = "Suggest 3 habits for categories: [" + categoriesStr + "]. Return JSON array with title, description, frequency, points.";
-
-        return aiService.callClaudeApi(prompt);
-    }
-
-    //  بناء خطة هدف ذكية مخصصة بناءً على الملف الصحي للشخص
-    public String getAiGoalPlan(Integer individualId, String userGoal) {
+    public String generateGoalPlan(Integer individualId, String userGoal) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
 
         Profile profile = individual.getProfile();
         if (profile == null) throw new ApiException("Please complete your health profile first");
 
-        String prompt = "Goal: " + userGoal + ". User Age: " + profile.getAge() + ", Weight: " + profile.getWeight() + ". Generate structured JSON plan.";
+        StringBuilder currentHabits = new StringBuilder();
+        for (Habit h : individual.getHabits()) {
+            currentHabits.append("- ").append(h.getTitle()).append("\n");
+        }
+
+        String prompt = "User Goal: \"" + userGoal + "\"\n" +
+                "User Profile Details:\n" +
+                "- Age: " + profile.getAge() + "\n" +
+                "- Weight: " + profile.getWeight() + " kg\n" +
+                "- Height: " + profile.getHeight() + " cm\n" +
+                "- Medical Conditions: " + profile.getMedicalConditions() + "\n" +
+                "- Bad Habits to break: " + profile.getBadHabit() + "\n\n" +
+                "Current Active Habits:\n" + currentHabits + "\n" +
+                "Generate a structured fitness/lifestyle plan tailored strictly to these metrics. Provide a JSON object containing:\n" +
+                "1. 'summary': 2-3 sentences explaining the strategy.\n" +
+                "2. 'recommendedHabits': Array of new habits to add (title, description, frequency).\n" +
+                "3. 'warnings': Any health/medical precautions based on their profile.\n" +
+                "Respond ONLY with raw JSON.";
 
         return aiService.callClaudeApi(prompt);
     }
 
-    //  Badge Progress Advisor ( الشارات القادمة وكم باقي عليها)
+
+    public String getAchievementIndex(Integer individualId, String period) {
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual == null) throw new ApiException("Individual not found");
+
+        LocalDate now = LocalDate.now();
+        LocalDate startDate;
+
+        if ("week".equalsIgnoreCase(period)) startDate = now.minusDays(7);
+        else if ("month".equalsIgnoreCase(period)) startDate = now.minusMonths(1);
+        else startDate = now.minusYears(1);
+
+        int totalLogs = 0;
+        int completedLogs = 0;
+
+        for (Habit habit : individual.getHabits()) {
+            List<HabitLog> logs = habitLogRepository.findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(
+                    habit.getId(), startDate, now, "COMPLETED");
+            completedLogs += logs.size();
+
+            totalLogs += ("week".equalsIgnoreCase(period)) ? 7 : 30;
+        }
+
+        double completionRate = (totalLogs == 0) ? 0.0 : ((double) completedLogs / totalLogs) * 100;
+
+        String prompt = "The user completed " + completedLogs + " habit logs in the past " + period + ".\n" +
+                "Actual Completion Rate: " + String.format("%.2f", completionRate) + "%.\n" +
+                "Please evaluate this performance and respond ONLY with a raw JSON object containing:\n" +
+                "1. 'score': Performance score out of 100.\n" +
+                "2. 'evaluation': Clear assessment of their commitment (2 sentences).\n" +
+                "3. 'motivationalMessage': A custom personalized psychological boost or warning based on their score.\n" +
+                "Respond ONLY with raw JSON.";
+
+        return aiService.callClaudeApi(prompt);
+    }
+
     public String getBadgeProgressAdvisor(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
@@ -116,11 +155,20 @@ public class IndividualService {
             earnedBadges.append("- ").append(b.getTitle()).append("\n");
         }
 
+        List<Badge> allSystemBadges = badgeRepository.findAll();
+        StringBuilder systemBadgesSchema = new StringBuilder();
+        for (Badge b : allSystemBadges) {
+            systemBadgesSchema.append("- ").append(b.getTitle())
+                    .append(" (Required Points: ").append(b.getPointsRequired()).append(")\n");
+        }
+
         String prompt = "User: " + individual.getFullName() + "\n" +
                 "Current Total Points: " + individual.getPoints() + "\n" +
                 "Already Earned Badges:\n" + earnedBadges + "\n" +
-                "Review the current points and analyze which badges are upcoming (Standard milestones: Starter=100, Committed=500, Hero=1000, Legend=2500). " +
-                "Calculate exactly how many points are remaining for each locked badge, and give 2 tailored tips on how to reach them faster.\n" +
+                "Available System Badges & Milestones (From Database):\n" + systemBadgesSchema + "\n" +
+                "Review the user's current points against the system badges available in the database. " +
+                "Identify which badges are still locked, calculate exactly how many points are remaining for each locked badge, " +
+                "and give 2 tailored tips on how to reach the next locked milestone faster.\n" +
                 "Respond ONLY with a raw JSON object containing:\n" +
                 "1. 'currentPoints': Integer\n" +
                 "2. 'upcomingBadges': Array of objects (badgeTitle, requiredPoints, pointsRemaining)\n" +
@@ -130,23 +178,47 @@ public class IndividualService {
         return aiService.callClaudeApi(prompt);
     }
 
-    //  Smart Habit Roadmap (خريطة طريق العادات المقترحة )
+
     public String getSmartHabitRoadmap(Integer individualId) {
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual == null) {
+            throw new ApiException("Individual not found");
+        }
+
+        Profile profile = individual.getProfile();
+        String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
+
+        String prompt = "Create a long-term 'Smart Habit Roadmap' divided into progressive phases for goal: \"" + mainGoal + "\" in JSON object format. " +
+                "Provide specific habits, category, and expected points for each phase. Respond ONLY with raw JSON.";
+
+        return aiService.callClaudeApi(prompt);
+    }
+
+    public void sendIndividualRoadmapReport(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
 
         Profile profile = individual.getProfile();
         String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
 
-        String prompt = "The user has the final goal: \"" + mainGoal + "\".\n" +
-                "Create a long-term 'Smart Habit Roadmap' divided into progressive phases. For each phase, suggest specific habits, category, frequency, duration (e.g., '21 days'), and expected points.\n" +
-                "Respond ONLY with a valid raw JSON object containing:\n" +
-                "1. 'finalGoal': \"" + mainGoal + "\"\n" +
-                "2. 'phases': Array of objects (phaseName, focus, recommendedHabits [array of objects with title, description, category, frequency, duration, expectedPoints]).\n" +
-                "Respond ONLY with raw JSON.";
 
-        return aiService.callClaudeApi(prompt);
+        String prompt = "Create a progressive 'Smart Habit Roadmap' for goal: \"" + mainGoal + "\" divided into 3 phases in JSON format. " +
+                "The JSON MUST strictly use these keys: 'goal', 'phases', 'phase_name', 'duration_weeks', 'habits', 'habit_name', 'description', 'category', 'points_per_completion'. Respond ONLY with raw JSON.";
+
+        String rawJsonRoadmap = aiService.callClaudeApi(prompt);
+
+        byte[] pdfBytes = createPdfService.generateAiRoadmapPdf(individual.getFullName(), rawJsonRoadmap);
+
+        emailService.sendReportByEmail(individual.getEmail(), pdfBytes, individual.getFullName(), "Smart Habit Roadmap");
     }
+    public Set<Badge> getIndividualBadges(Integer individualId) {
+        Individual individual = individualRepository.findById(individualId)
+                .orElseThrow(() -> new ApiException("Individual not found"));
+
+        return individual.getBadges();
+    }
+
+
 
 
 

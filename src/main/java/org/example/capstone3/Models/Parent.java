@@ -32,6 +32,7 @@ public class Parent {
     @NotEmpty(message = "Email cannot be empty")
     private String email;
     @Column(columnDefinition = "VARCHAR(10)" ,nullable = false ,unique = true)
+    @NotEmpty(message = "Phone number cannot be empty")
     private String phoneNumber;
     @Column(columnDefinition = "VARCHAR(255)")
     @NotEmpty(message = "Password cannot be empty")

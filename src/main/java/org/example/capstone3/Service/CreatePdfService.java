@@ -142,4 +142,93 @@ public class CreatePdfService {
                 childrenRows
         );
     }
+
+    public byte[] generateAiRoadmapPdf(String individualName, String rawJsonRoadmap) {
+        StringBuilder phasesHtmlBlocks = new StringBuilder();
+        String finalGoal = "Lifestyle Transformation";
+
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(rawJsonRoadmap);
+
+            if (rootNode.has("finalGoal")) finalGoal = rootNode.get("finalGoal").asText();
+            else if (rootNode.has("goal")) finalGoal = rootNode.get("goal").asText();
+
+            if (rootNode.has("phases") && rootNode.get("phases").isArray()) {
+                for (com.fasterxml.jackson.databind.JsonNode phase : rootNode.get("phases")) {
+                    String phaseName = phase.has("phaseName") ? phase.get("phaseName").asText() : "Next Stage";
+                    String focus = phase.has("focus") ? phase.get("focus").asText() : "General Progress";
+
+                    StringBuilder habitsRows = new StringBuilder();
+                    if (phase.has("recommendedHabits") && phase.get("recommendedHabits").isArray()) {
+                        for (com.fasterxml.jackson.databind.JsonNode habit : phase.get("recommendedHabits")) {
+                            String title = habit.has("title") ? habit.get("title").asText() : "New Habit";
+                            String desc = habit.has("description") ? habit.get("description").asText() : "";
+                            String points = habit.has("expectedPoints") ? habit.get("expectedPoints").asText() : "10";
+
+                            habitsRows.append("<tr>")
+                                    .append("<td style=\"font-weight:bold;\">").append(title).append("</td>")
+                                    .append("<td>").append(desc).append("</td>")
+                                    .append("<td style=\"text-align:center;\">").append(points).append("</td>")
+                                    .append("</tr>");
+                        }
+                    }
+
+                    phasesHtmlBlocks.append("<div class=\"section\">")
+                            .append("<div class=\"label\" style=\"font-size: 16px; color: #1a1a2e; margin-bottom: 5px;\">Phase: ").append(phaseName).append("</div>")
+                            .append("<div style=\"font-size: 12px; color: #666; margin-bottom: 10px;\">Focus: ").append(focus).append("</div>")
+                            .append("<table>")
+                            .append("<thead><tr><th>Habit Title</th><th>Description</th><th>Points</th></tr></thead>")
+                            .append("<tbody>").append(habitsRows.toString()).append("</tbody>")
+                            .append("</table>")
+                            .append("</div>");
+                }
+            }
+        } catch (Exception e) {
+            String safeText = rawJsonRoadmap.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
+            phasesHtmlBlocks.append("<div class=\"section\"><div class=\"label\">Roadmap Text Details:</div><p style=\"font-size:13px; line-height:1.5;\">")
+                    .append(safeText).append("</p></div>");
+        }
+
+        String html = "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "    <style>" +
+                "        body { font-family: Arial, sans-serif; padding: 40px; color: #333; }" +
+                "        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }" +
+                "        .title { font-size: 28px; font-weight: bold; color: #1a1a2e; }" +
+                "        .section { margin-bottom: 25px; padding: 15px; background-color: #f9f9f9; border-radius: 8px; }" +
+                "        .label { font-weight: bold; color: #555; }" +
+                "        table { width: 100%; border-collapse: collapse; margin-top: 15px; }" +
+                "        th { background-color: #1a1a2e; color: white; padding: 8px; text-align: left; font-size: 12px; }" +
+                "        td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 12px; }" +
+                "        tr:hover { background-color: #f1f1f1; }" +
+                "        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #999; }" +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class=\"header\">" +
+                "        <div class=\"title\">Smart Habit Roadmap</div>" +
+                "        <p>Individual: " + individualName + "</p>" +
+                "        <p>Final Goal: " + finalGoal + " &nbsp;|&nbsp; Generated: " + java.time.LocalDate.now() + "</p>" +
+                "    </div>" +
+                "    " + phasesHtmlBlocks.toString() + "" +
+                "    <div class=\"footer\">" +
+                "        <p>Generated automatically by AI System Companion</p>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+
+        try {
+            java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
+            org.xhtmlrenderer.pdf.ITextRenderer renderer = new org.xhtmlrenderer.pdf.ITextRenderer();
+            renderer.setDocumentFromString(html);
+            renderer.layout();
+            renderer.createPDF(outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new org.example.capstone3.API.ApiException("Failed to generate AI roadmap PDF");
+        }
+    }
+
 }

@@ -45,9 +45,10 @@ public class BadgeController {
         return ResponseEntity.status(200).body(new ApiResponse("Badge deleted successfully"));
     }
 
-    @PutMapping("/check-assign/{individualId}")
-    public ResponseEntity<ApiResponse> checkAndAssignBadges(@PathVariable Integer individualId) {
-        badgeService.checkAndAssignBadges(individualId);
-        return ResponseEntity.status(200).body(new ApiResponse("Badges checked and assigned to individual if qualified"));
+    @GetMapping("/get-by-individual/{individualId}")
+    public ResponseEntity<?> getBadgesByIndividual(@PathVariable Integer individualId) {
+        return ResponseEntity.status(200).body(badgeService.getBadgesByIndividual(individualId));
     }
+
+
 }
