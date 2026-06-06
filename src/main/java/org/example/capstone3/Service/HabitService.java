@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.IndividualHabitDTO;
+import org.example.capstone3.DTO.OUT.AiHabitDTOout;
 import org.example.capstone3.DTO.OUT.HabitSummaryDTOout;
 import org.example.capstone3.DTO.OUT.TodayHabitDTO;
 import org.example.capstone3.Models.*;
@@ -208,7 +209,7 @@ public class HabitService {
             String lang="arabic";
             String message=aiService.generateWhatsAppMessage(topic,tone,lang);
             Parent parent=getParent(habit.getParent().getId());
-            whatsAppService.whatsAppMessage(parent.getPhoneNumber(),message);
+            whatsAppService.whatsAppMessage("0542381757",message);
         }
 
         habitLogRepository.save(log);
@@ -366,7 +367,7 @@ public class HabitService {
         return habitRepository.findHabitsByCategory_Id(categoryId);
     }
 
-    public String generateHabits(Integer individualId) {
+    public List<AiHabitDTOout> generateHabits(Integer individualId) {
 
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) {
@@ -388,9 +389,10 @@ public class HabitService {
 
         String result=aiService.callClaudeApi(prompt);
         ObjectMapper mapper = new ObjectMapper();
+        List<Habit> routines=new ArrayList<>();
         try {
             // convert json array string to List<Routine>
-            List<Habit> routines = mapper.readValue(result, new TypeReference<List<Habit>>(){});
+             routines = mapper.readValue(result, new TypeReference<List<Habit>>(){});
 
             // Print the parsed titles
             for (Habit routine : routines) {
@@ -404,7 +406,11 @@ public class HabitService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result ;
+        List<AiHabitDTOout> resultList=new ArrayList<>();
+        for (Habit routine : routines) {
+            resultList.add(modelMapper.map(routine,AiHabitDTOout.class));
+        }
+        return resultList ;
     }
 
     public HabitLog isAlreadyCompleeted(Habit habit) {

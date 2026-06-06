@@ -28,7 +28,7 @@ public class Profile {
     @Column(columnDefinition = "text")
     private String badHabit;
 
-    @Column(columnDefinition = "varchar(100)", nullable = false)
+    @Column(columnDefinition = "varchar(100)")
     private String mainGoal;
 
     @OneToOne

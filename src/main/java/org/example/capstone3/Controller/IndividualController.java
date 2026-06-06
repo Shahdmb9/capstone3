@@ -67,7 +67,7 @@ public class IndividualController {
     }
 
     @GetMapping("/{individualId}/ai/roadmap")
-    public ResponseEntity<String> getSmartHabitRoadmap(@PathVariable Integer individualId) {
+    public ResponseEntity<?> getSmartHabitRoadmap(@PathVariable Integer individualId) {
         return ResponseEntity.status(200).body(individualService.getSmartHabitRoadmap(individualId));
     }
 
