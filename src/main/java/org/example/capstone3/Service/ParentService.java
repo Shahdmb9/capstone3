@@ -1,5 +1,6 @@
 package org.example.capstone3.Service;
 
+
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.In.ParentDTOIn;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class ParentService {
     private final CreatePdfService createPdfService;
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
+
     private final AiService aiService;
     private final ChildRepository childRepository;
     private final HabitLogRepository habitLogRepository;
@@ -169,6 +173,42 @@ public class ParentService {
         if (parent == null) throw new ApiException("Parent not found");
         return aiService.callClaudeApi(aiService.buildPromptFamilyScore(parent));
     }
+
+    public String getFamilyActivity(Integer parentId , String city ) {
+        Parent parent = parentRepository.findParentById(parentId);
+        if (parent == null) throw new ApiException("Parent not found");
+        String weatherInfo = weatherService.getWeatherDescription(city );
+        return aiService.callClaudeApi(aiService.buildPromptFamilyActivity(parent , weatherInfo));
+    }
+    public  List<Map<String, Object>> getFamilyLeaderboard(Integer parentId){
+        Parent parent = parentRepository.findParentById(parentId);
+        if (parent == null) throw new ApiException("Parent not found");
+        List<Child> children = new ArrayList<>(parent.getChildren());
+        children.sort((a, b) -> b.getPoints() - a.getPoints());
+
+        List<Map<String, Object>> leaderboard = new ArrayList<>();
+
+        int rank = 1;
+        for (Child child : children) {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("rank", rank);
+            entry.put("childName", child.getFullName());
+            entry.put("points", child.getPoints());
+            leaderboard.add(entry);
+            rank++;
+        }
+
+        return leaderboard;
+    }
 }
+    public String FamilyDisciplineScore(Integer parentId) {
+        Parent parent = parentRepository.findParentById(parentId);
+        if (parent == null) throw new ApiException("Parent not found");
+        return aiService.callClaudeApi(aiService.buildPromptFamilyScore(parent));
+    }
+}
+
+
+
 
 
