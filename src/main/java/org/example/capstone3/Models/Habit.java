@@ -34,8 +34,9 @@ public class Habit {
 
     @Column(columnDefinition = "varchar(20)", nullable = false)
     @NotBlank(message = "Frequency is required")
-    @Pattern(regexp = "^(DAILY|WEEKLY|MONTHLY)$", message = "Frequency must be either DAILY, WEEKLY, or MONTHLY")
-    private String frequency;
+    @Pattern(regexp = "^(DAILY)$", message = "Frequency must be DAILY")
+    private String frequency = "DAILY";
+
 
     @Column(nullable = false)
     private Integer points = 10;
@@ -48,7 +49,7 @@ public class Habit {
     private Individual individual;
 
     @ManyToOne
-    @JoinColumn(name = "parent_id", referencedColumnName = "id")//optional
+    @JoinColumn(name = "parent_id", referencedColumnName = "id")
     @JsonIgnore
     private Parent parent;
 

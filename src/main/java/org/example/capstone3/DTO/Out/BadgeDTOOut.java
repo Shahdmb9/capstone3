@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BadgeDTOOut {
-    private Integer id;
+
     private String title;
     private String description;
     private Integer pointsRequired;

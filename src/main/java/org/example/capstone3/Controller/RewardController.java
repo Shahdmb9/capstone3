@@ -39,12 +39,5 @@ public class RewardController {
         rewardService.delete(id);
         return ResponseEntity.status(200).body(new ApiResponse("Reward deleted successfully"));
     }
-    @PutMapping("/redeem/{childId}/{rewardId}")
-    public ResponseEntity<ApiResponse> redeemReward(@PathVariable Integer childId, @PathVariable Integer rewardId) {
-        rewardService.redeemReward(childId, rewardId);
-        return ResponseEntity.status(200).body(new ApiResponse("Reward redeemed successfully! Points deducted."));
-    }
-
-
 
 }

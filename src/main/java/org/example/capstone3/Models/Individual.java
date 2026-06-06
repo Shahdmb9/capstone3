@@ -34,10 +34,10 @@ public class Individual {
     private Integer points = 0;
 
     @OneToOne(mappedBy = "individual", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
     private Profile profile;
 
     @OneToMany(mappedBy = "individual", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Habit> habits;
 
     @ManyToMany

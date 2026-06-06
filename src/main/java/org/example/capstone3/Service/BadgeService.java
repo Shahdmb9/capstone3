@@ -59,22 +59,5 @@ public class BadgeService {
         badgeRepository.delete(badge);
     }
 
-    public void checkAndAssignBadges(Integer individualId) {
-        Individual individual = individualRepository.findIndividualById(individualId);
-        if (individual == null) throw new ApiException("Individual not found");
 
-        List<Badge> allBadges = badgeRepository.findAll();
-        boolean updated = false;
-
-        for (Badge badge : allBadges) {
-            if (individual.getPoints() >= badge.getPointsRequired() && !individual.getBadges().contains(badge)) {
-                individual.getBadges().add(badge);
-                updated = true;
-            }
-        }
-
-        if (updated) {
-            individualRepository.save(individual);
-        }
-    }
 }

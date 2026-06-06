@@ -82,24 +82,6 @@ public class RewardService {
         return reward;
     }
 
-    public void redeemReward(Integer childId, Integer rewardId) {
-        Child child = childRepository.findChildById(childId);
-        if (child == null) throw new ApiException("Child not found");
-
-        Reward reward = rewardRepository.findRewardById(rewardId);
-        if (reward == null) throw new ApiException("Reward not found");
-
-        if (child.getPoints() < reward.getRequiredPoints()) {
-            throw new ApiException("You do not have enough points for this reward");
-        }
-
-        child.setPoints(child.getPoints() - reward.getRequiredPoints());
-
-        reward.setClaimedAt(java.time.LocalDateTime.now());
-
-        childRepository.save(child);
-        rewardRepository.save(reward);
-    }
 
 
 

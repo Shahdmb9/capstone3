@@ -17,6 +17,7 @@ public class TaskApplicationService {
     private final TaskRepository taskRepository;
     private final ChildRepository childRepository;
     private final TaskRewardRepository taskRewardRepository;
+    private final WhatsAppService whatsAppService;
 
     public void childApplyForTask(Integer childId, Integer taskId) {
         Child child = childRepository.findChildById(childId);
@@ -41,9 +42,29 @@ public class TaskApplicationService {
         app.setLoggedDate(LocalDate.now());
 
         taskApplicationRepository.save(app);
+
+        if (task.getParent() != null) {
+            Parent parent = task.getParent();
+            whatsAppService.sendReportByWhatsApp(parent.getPhoneNumber(), "تنبيه: قام الابن " + child.getFullName() + " بتقديم طلب إنجاز للمهمة الجماعية: " + task.getTitle());
+        }
     }
 
-    public void parentApproveTaskWinner(Integer applicationId, String action) { // action: APPROVED أو REJECTED
+    public List<TaskApplication> getPendingApplicationsForParent(Integer parentId) {
+        List<TaskApplication> allPending = taskApplicationRepository.findAll();
+        List<TaskApplication> parentPending = new java.util.ArrayList<>();
+
+        for (TaskApplication app : allPending) {
+            if ("PENDING".equalsIgnoreCase(app.getApprovalStatus()) && app.getTask() != null && app.getTask().getParent() != null) {
+                if (app.getTask().getParent().getId().equals(parentId)) {
+                    parentPending.add(app);
+                }
+            }
+        }
+        return parentPending;
+    }
+
+
+    public void parentApproveTaskWinner(Integer applicationId, String action) {
         TaskApplication app = taskApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ApiException("Application not found"));
 
@@ -56,20 +77,26 @@ public class TaskApplicationService {
         if (action.equalsIgnoreCase("APPROVED")) {
             app.setApprovalStatus("APPROVED");
             app.setApprovedAt(LocalDate.now());
+
             task.setStatus("COMPLETED");
 
             TaskReward reward = task.getTaskReward();
             if (reward != null) {
                 reward.setStatus("COMPLETED");
                 reward.setClaimedAt(new java.util.Date());
+
+                reward.setWinnerChild(app.getChild());
+
                 taskRewardRepository.save(reward);
             }
 
             taskRepository.save(task);
+
         } else {
             app.setApprovalStatus("REJECTED");
         }
         taskApplicationRepository.save(app);
     }
+
 }
 

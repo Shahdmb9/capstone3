@@ -3,6 +3,7 @@ package org.example.capstone3.Service;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.In.IndividualDTOIn;
+import org.example.capstone3.DTO.Out.BadgeDTOOut;
 import org.example.capstone3.Models.*;
 import org.example.capstone3.Repository.CategoryRepository;
 import org.example.capstone3.Repository.HabitLogRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -190,8 +192,6 @@ public class IndividualService {
         return aiService.callClaudeApi(prompt);
     }
 
-
-
     public String getSmartHabitRoadmap(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) {
@@ -202,11 +202,34 @@ public class IndividualService {
         String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
 
         String prompt = "Create a long-term 'Smart Habit Roadmap' divided into progressive phases for goal: \"" + mainGoal + "\" in JSON object format. " +
-                "Provide specific habits, category, frequency, duration, and expected points for each phase.";
+                "Provide specific habits, category, and expected points for each phase. Respond ONLY with raw JSON.";
 
         return aiService.callClaudeApi(prompt);
     }
 
+    public void sendIndividualRoadmapReport(Integer individualId) {
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual == null) throw new ApiException("Individual not found");
+
+        Profile profile = individual.getProfile();
+        String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
+
+
+        String prompt = "Create a progressive 'Smart Habit Roadmap' for goal: \"" + mainGoal + "\" divided into 3 phases in JSON format. " +
+                "The JSON MUST strictly use these keys: 'goal', 'phases', 'phase_name', 'duration_weeks', 'habits', 'habit_name', 'description', 'category', 'points_per_completion'. Respond ONLY with raw JSON.";
+
+        String rawJsonRoadmap = aiService.callClaudeApi(prompt);
+
+        byte[] pdfBytes = createPdfService.generateAiRoadmapPdf(individual.getFullName(), rawJsonRoadmap);
+
+        emailService.sendReportByEmail(individual.getEmail(), pdfBytes, individual.getFullName(), "Smart Habit Roadmap");
+    }
+    public Set<Badge> getIndividualBadges(Integer individualId) {
+        Individual individual = individualRepository.findById(individualId)
+                .orElseThrow(() -> new ApiException("Individual not found"));
+
+        return individual.getBadges();
+    }
 
 
 
