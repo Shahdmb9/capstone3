@@ -3,7 +3,9 @@
 
 
 ## 📊 1. Class Diagram Architecture
-![Class Diagram](src/main/resources/Class%20Diagram.jpg) 
+[![Class Diagram](src/main/resources/Class%20Diagram.jpg) ]
+
+(https://github.com/Shahdmb9/capstone3/blob/master/src/main/resources/Class%20Diagram.jpg)
 
 # HABIT SYSTEM ENDPOINTS (CAPSTONE 3)
 
