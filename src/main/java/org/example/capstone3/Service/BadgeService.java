@@ -69,12 +69,22 @@ public class BadgeService {
         for (Badge badge : allBadges) {
             if (individual.getPoints() >= badge.getPointsRequired() && !individual.getBadges().contains(badge)) {
                 individual.getBadges().add(badge);
+                badge.getIndividuals().add(individual);
+                badgeRepository.save(badge);
                 updated = true;
             }
         }
 
         if (updated) {
+
             individualRepository.save(individual);
         }
+        else throw new ApiException("You're not eligible for any badges");
+    }
+
+    public List<Badge> getBadgesByIndividual(Integer individualId) {
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual == null) throw new ApiException("Individual not found");
+       return  badgeRepository.findBadgeByIndividualsContaining(individual);
     }
 }
