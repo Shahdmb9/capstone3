@@ -81,7 +81,7 @@ public class ParentService {
         Parent parent = parentRepository.findParentById(id);
         if (parent == null) throw new ApiException("Parent not found");
         byte[] reportPDF = createPdfService.generatePerformanceReportPdf(parent, period);
-        emailService.sendReportByEmail(parent.getEmail(), reportPDF, parent.getFullName());
+        emailService.sendReportByEmail(parent.getEmail(), reportPDF, parent.getFullName(), "Children Performance Report");
         whatsAppService.sendReportByWhatsApp(parent.getPhoneNumber(), parent.getFullName());
     }
 

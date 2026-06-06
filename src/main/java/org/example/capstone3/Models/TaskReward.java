@@ -36,4 +36,10 @@ public class TaskReward {
     @JsonIgnore
     private Parent parent;
 
+    @ManyToOne
+    @JoinColumn(name = "winner_child_id")
+    @JsonIgnore
+    private Child winnerChild;
+
+
 }

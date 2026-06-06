@@ -3,6 +3,8 @@ package org.example.capstone3.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,16 +23,27 @@ public class Child {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @Column(columnDefinition = "varchar(100) not null ")
+    @NotEmpty(message = "Full name cannot be empty")
     private String fullName ;
+
     @Column(nullable = false ,unique = true)
+    @NotEmpty(message = "Email cannot be empty")
+    @Email
     private String email ;
+
     @Column(nullable = false )
+    @NotEmpty(message = "Phone number cannot be empty")
     private Integer age ;
+
     @Column(nullable = false )
+    @NotEmpty(message = "Password cannot be empty")
     private String password ;
+
     @Column(columnDefinition = "DATETIME default CURRENT_TIMESTAMP")
     private Date createdAt ;
+
     @Column(columnDefinition = "int default 0 check (points >= 0)")
     private Integer points  ;
 
@@ -50,7 +63,6 @@ public class Child {
     private Set<Task> task=new HashSet<>();
 
     @OneToOne(mappedBy = "child", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
     private Profile profile;
 
 }

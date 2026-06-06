@@ -91,6 +91,12 @@ public class ParentController {
     public  ResponseEntity<?> getFamilyLeaderboard(@PathVariable Integer id ) {
         return ResponseEntity.status(200).body(parentService.getFamilyLeaderboard(id));
     }
+    @GetMapping("/{parentId}/family-discipline-score")
+    public ResponseEntity<String> getFamilyDisciplineScore(@PathVariable Integer parentId) {
+        return ResponseEntity.status(200).body(parentService.FamilyDisciplineScore(parentId));
+    }
+
+
 
 
 

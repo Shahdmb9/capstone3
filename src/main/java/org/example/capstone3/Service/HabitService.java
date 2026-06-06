@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.IndividualHabitDTO;
+import org.example.capstone3.DTO.OUT.HabitSummaryDTOout;
+import org.example.capstone3.DTO.OUT.TodayHabitDTO;
 import org.example.capstone3.Models.*;
 import org.example.capstone3.Repository.*;
 import org.json.JSONObject;
@@ -30,13 +32,15 @@ public class HabitService {
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
     private final AiService aiService;
-    private final BadgeService badgeService;
+    private final RewardRepository rewardRepository;
+    private final BadgeRepository badgeRepository;
 
+    //creating logs for the users evrey say
     @Scheduled(cron = "0 0 0 * * *")
     public void evaluateHabitsDaily() {
-        List<Habit> allHabits = habitRepository.findAll();
+        List<Habit> allHabits = habitRepository.findByIsAiSuggestedFalse();
         for (Habit habit : allHabits) {
-            HabitLog log = new HabitLog(null, LocalDate.now(), "NOT_STARTED", null, null, habit);
+            HabitLog log = createHabitLog(habit);
             habitLogRepository.save(log);
         }
     }
@@ -65,14 +69,14 @@ public class HabitService {
         Habit habit = new Habit();
         habit.setTitle(dto.getTitle());
         habit.setDescription(dto.getDescription());
-        habit.setFrequency(dto.getFrequency().toUpperCase());
+        habit.setFrequency("DAILY");
         habit.setIsAiSuggested(false);
         habit.setIndividual(individual);
         habit.setCategory(category);
         habit.setStreak(0);
         habit.setHighestStreak(0);
 
-        HabitLog habitLog = new HabitLog(null, LocalDate.now(), "NOT_STARTED", null, null, habit);
+        HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
 
         habitRepository.save(habit);
         habitLogRepository.save(habitLog);
@@ -119,12 +123,65 @@ public class HabitService {
         habitRepository.delete(habit);
     }
 
+    public List<TodayHabitDTO> getTodayHabitsForChild(Integer childId) {
+        Child child = getChild(childId);
+        List<TodayHabitDTO> result = new ArrayList<>();
+        for (Habit habit : child.getHabit()) {
+            HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, LocalDate.now());
+            result.add(new TodayHabitDTO(habit.getId(),log.getId(), habit.getTitle(),
+                    habit.getDescription(), habit.getPoints(), habit.getStreak(),habit.getHighestStreak(), log.getApprovalStatus()));
+        }
+        return result;
+    }
+
+    public List<TodayHabitDTO> getTodayHabitsForIndividual(Integer individualId) {
+        Individual individual = getIndividual(individualId);
+        List<TodayHabitDTO> result = new ArrayList<>();
+        for (Habit habit : individual.getHabits()) {
+            HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, LocalDate.now());
+            result.add(new TodayHabitDTO(habit.getId(),log.getId(), habit.getTitle(),
+                    habit.getDescription(), habit.getPoints(), habit.getStreak(),habit.getHighestStreak(), log.getApprovalStatus()));
+        }
+        return result;
+
+    }
+
+    public List<TodayHabitDTO> getHabitByDateIndividual(Integer individualId, LocalDate date) {
+        Individual individual = getIndividual(individualId);
+        List<TodayHabitDTO> result = new ArrayList<>();
+        for (Habit habit : individual.getHabits()) {
+            HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, date);
+            result.add(new TodayHabitDTO(habit.getId(),log.getId(), habit.getTitle(),
+                    habit.getDescription(), habit.getPoints(), habit.getStreak(),habit.getHighestStreak(), log.getApprovalStatus()));
+        }
+        return result;
+    }
+
+    public List<TodayHabitDTO> getHabitByDateChild(Integer childId, LocalDate date) {
+        Child child = getChild(childId);
+        List<TodayHabitDTO> result = new ArrayList<>();
+        for (Habit habit : child.getHabit()) {
+            HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, date);
+            result.add(new TodayHabitDTO(habit.getId(),log.getId(), habit.getTitle(),
+                    habit.getDescription(), habit.getPoints(), habit.getStreak(),habit.getHighestStreak(), log.getApprovalStatus()));
+        }
+        return result;
+    }
+
+    public void deleteAllAiSuggested(Integer individualId){
+        Individual individual=getIndividual(individualId);
+        List<Habit> habit=habitRepository.findHabitByIsAiSuggestedTrueAndIndividualId(individualId);
+        if(habit.isEmpty())
+            throw new ApiException("No AI Habit found");
+        habitRepository.deleteAllAiSuggestedTrue();
+    }
+
     public void logHabit(Integer habitLogId) {
         HabitLog log = getHabitLogById(habitLogId);
         Habit habit = getHabitById(log.getHabit().getId());
 
-        if (isAlreadyLoggedInPeriod(habit) != null) {
-            throw new RuntimeException("Habit already logged for this " + habit.getFrequency() + " period");
+        if (isAlreadyCompleeted(habit) != null) {
+            throw new ApiException("Habit already logged for this " + habit.getFrequency() + " period");
         }
 
         log.setLoggedDate(LocalDate.now());
@@ -138,16 +195,44 @@ public class HabitService {
             if (individual != null) {
                 individual.setPoints(individual.getPoints() + habit.getPoints());
                 individualRepository.save(individual);
-                badgeService.checkAndAssignBadges(individual.getId());
+
+                checkAndAssignBadgesToIndividual(individual);
             }
         } else {
-            Parent parent = getParent(habit.getParent().getId());
-            whatsAppService.sendReportByWhatsApp(parent.getPhoneNumber(), parent.getFullName());
+            Child child = habit.getChild();
+            String name=child.getFullName();
+            String topic="your child: "+ name +"just update the habit status he need your conformation";
+            String tone="notifyong the parent about pending request";
+            String lang="arabic";
+            String message=aiService.generateWhatsAppMessage(topic,tone,lang);
+            Parent parent=getParent(habit.getParent().getId());
+            whatsAppService.whatsAppMessage(parent.getPhoneNumber(),message);
         }
 
         habitLogRepository.save(log);
         habitRepository.save(habit);
     }
+
+    private void checkAndAssignBadgesToIndividual(Individual individual) {
+        List<Badge> allBadges = badgeRepository.findAll();
+
+        for (Badge badge : allBadges) {
+            if (individual.getPoints() >= badge.getPointsRequired()) {
+
+                if (!individual.getBadges().contains(badge)) {
+
+                    individual.getBadges().add(badge);
+                    badge.getIndividuals().add(individual);
+
+                    badgeRepository.save(badge);
+                    System.out.println("Badge '" + badge.getTitle() + "' successfully awarded to: " + individual.getFullName());
+                }
+            }
+        }
+        individualRepository.save(individual);
+    }
+
+
 
     public void reviewChildLog(Integer parentId, Integer habitId, String status) {
         if (!status.matches("^(NOT_STARTED|PENDING|COMPLETED|REJECTED)$"))
@@ -183,10 +268,14 @@ public class HabitService {
                 if (log.getHabit().getReward() != null) {
                     Reward reward = log.getHabit().getReward();
                     if (child.getPoints() >= reward.getRequiredPoints()) {
-                        System.out.println("Child target achieved for: " + reward.getTitle());
-                    }
+                        child.setPoints(child.getPoints() - reward.getRequiredPoints());
+
+                        reward.setClaimedAt(java.time.LocalDateTime.now());
+
+                        rewardRepository.save(reward);                    }
                 }
             }
+            childRepository.save(child);
             habitRepository.save(log.getHabit());
         }
     }
@@ -196,8 +285,10 @@ public class HabitService {
         if (habit.getHighestStreak() == null) habit.setHighestStreak(0);
 
         LocalDate today = LocalDate.now();
+
         List<HabitLog> recentLogs = habitLogRepository.findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
 
+        // Find the most recent log that is except today
         LocalDate lastLogDate = null;
         for (HabitLog log : recentLogs) {
             if (log.getLoggedDate().isBefore(today)) {
@@ -208,7 +299,7 @@ public class HabitService {
 
         boolean streakContinues = false;
         if (lastLogDate != null) {
-            streakContinues = isConsecutivePeriod(lastLogDate, today, habit.getFrequency());
+            streakContinues = lastLogDate.isEqual(today.minusDays(1));
         }
 
         if (streakContinues) {
@@ -222,77 +313,28 @@ public class HabitService {
         }
     }
 
-    private boolean isConsecutivePeriod(LocalDate lastLog, LocalDate today, String frequency) {
-        switch (frequency.toUpperCase()) {
-            case "DAILY":
-                return lastLog.isEqual(today.minusDays(1));
-            case "WEEKLY":
-                LocalDate thisWeekStart = today.with(DayOfWeek.SUNDAY);
-                LocalDate lastWeekStart = thisWeekStart.minusWeeks(1);
-                LocalDate lastWeekEnd = thisWeekStart.minusDays(1);
-                return !lastLog.isBefore(lastWeekStart) && !lastLog.isAfter(lastWeekEnd);
-            case "MONTHLY":
-                LocalDate thisMonthStart = today.withDayOfMonth(1);
-                LocalDate lastMonthStart = thisMonthStart.minusMonths(1);
-                LocalDate lastMonthEnd = thisMonthStart.minusDays(1);
-                return !lastLog.isBefore(lastMonthStart) && !lastLog.isAfter(lastMonthEnd);
-            case "YEARLY":
-                LocalDate thisYearStart = today.withDayOfYear(1);
-                LocalDate lastYearStart = thisYearStart.minusYears(1);
-                LocalDate lastYearEnd = thisYearStart.minusDays(1);
-                return !lastLog.isBefore(lastYearStart) && !lastLog.isAfter(lastYearEnd);
-            default:
-                return false;
-        }
-    }
-
     public HabitLog getHabitLogById(Integer logId) {
         HabitLog log = habitLogRepository.findHabitLogById(logId);
         if (log == null) throw new ApiException("Log not found");
         return log;
     }
 
-    /*
-    public Map<String, Integer> IndividualStreakPerHabit(Integer individualId) {
-        Individual individual = getIndividual(individualId);
-        Map<String, Integer> streakMap = new HashMap<>();
-        for (Habit habit : individual.getHabits()) {
-            List<HabitLog> approvedLogs = habitLogRepository.findByHabitAndApprovalStatus(habit, "COMPLETED");
-            List<LocalDate> dates = new ArrayList<>();
-            for (HabitLog log : approvedLogs) {
-                LocalDate loggedDate = log.getLoggedDate();
-                if (!dates.contains(loggedDate)) dates.add(loggedDate);
-            }
-            dates.sort(Comparator.reverseOrder());
-            int streak = 0;
-            if (!dates.isEmpty()) {
-                streak = 1;
-                int allowedGap = getAllowedGap(habit.getFrequency());
-                for (int i = 0; i < dates.size() - 1; i++) {
-                    long daysBetween = ChronoUnit.DAYS.between(dates.get(i + 1), dates.get(i));
-                    if (daysBetween <= allowedGap) streak++;
-                    else break;
-                }
-            }
-            streakMap.put(habit.getTitle(), streak);
-        }
-        return streakMap;
-    }
-
-    private int getAllowedGap(String frequency) {
-        switch (frequency.toUpperCase()) {
-            case "WEEKLY": return 7;
-            case "MONTHLY": return 30;
-            case "YEARLY": return 365;
-            default: return 1;
-        }
-    }
-    */
 
     public Habit getHabitById(Integer habitId) {
         Habit habit = habitRepository.findHabitById(habitId);
-        if (habit == null) throw new RuntimeException("Habit not found");
+        if (habit == null)
+            throw new ApiException("Habit not found");
+
         return habit;
+    }
+
+    public HabitSummaryDTOout getHabitSummary(Integer habitId) {
+        Habit habit = getHabitById(habitId);
+        Integer completedDays=habitLogRepository.findByHabitAndApprovalStatus(habit,"COMPLETED").size();
+        Integer missedDays=habitLogRepository.findByHabitAndApprovalStatus(habit,"NOT_STARTED").size();
+
+        return new HabitSummaryDTOout(habit.getId(), habit.getTitle(),
+                habit.getDescription(), habit.getPoints(), habit.getStreak(),habit.getHighestStreak(),missedDays,completedDays,habit.getCategory().getName());
     }
 
     public void acceptHabitSuggestedByAI(Integer individualId, Integer habitId) {
@@ -301,14 +343,14 @@ public class HabitService {
         Individual individual = getIndividual(individualId);
         if (individual != habit.getIndividual()) throw new ApiException("This is not your habit");
         habit.setIsAiSuggested(false);
-        createHabitLog(habitId);
+        createHabitLog(habit);
         habitRepository.save(habit);
     }
 
-    public void createHabitLog(Integer habitId) {
-        Habit habit = getHabitById(habitId);
+    public HabitLog createHabitLog(Habit habit) {
         HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
         habitLogRepository.save(habitLog);
+        return habitLog;
     }
 
     public List<Habit> AISuggestedHabit(Integer individualId) {
@@ -323,21 +365,36 @@ public class HabitService {
     }
 
     public String generateHabits(Integer individualId) {
-        Individual individual = individualRepository.findIndividualById(individualId);
-        if (individual == null) throw new ApiException("Individual not found");
-        List<Category> interest = new ArrayList<>(individual.getCategories());
-        if (interest.isEmpty()) throw new ApiException("No interest found");
 
-        String prompt = "Generate 5 habits for the following categories:\n- " + interest.toString() + "\nRespond in raw JSON object list format.";
-        String result = aiService.callClaudeApi(prompt);
+        Individual individual = individualRepository.findIndividualById(individualId);
+        if (individual == null) {
+            throw new ApiException("Individual not found");
+        }
+        //grab user intrest
+        List<Category> interest=new ArrayList<>(individual.getCategories());
+        if(interest.isEmpty())
+            throw new ApiException("No interest found");
+
+        String prompt = "Generate 5 habits for the following categories:\n" +
+                "- " + interest.toString() + "\n" +
+                "Respond ONLY with a raw JSON object containing:\n" +
+                "1. 'title': e.g., 'Exercise'\n" +
+                "2. 'description': e.g., 'Regular exercise for 30 minutes'\n" +
+                "3. 'frequency': e.g., 'DAILY' only DAILY\n" +
+                "4. 'points': e.g., 10\n"
+                +"Respond ONLY with raw JSON.";
+
+        String result=aiService.callClaudeApi(prompt);
         ObjectMapper mapper = new ObjectMapper();
         try {
-            List<Habit> routines = mapper.readValue(result, new TypeReference<List<Habit>>() {
-            });
+            // convert json array string to List<Routine>
+            List<Habit> routines = mapper.readValue(result, new TypeReference<List<Habit>>(){});
+
+            // Print the parsed titles
             for (Habit routine : routines) {
-                Habit habit = modelMapper.map(routine, Habit.class);
+                Habit habit=modelMapper.map(routine,Habit.class);
                 habit.setIndividual(individual);
-                String cateName = aiService.callClaudeApi("classify this habit: " + habit.getDescription() + " to one of " + interest.toString());
+                String cateName=aiService.callClaudeApi("classify this habit by name "+habit.getDescription()+" to one of :"+interest.toString()+"as : 'name': e.g., 'sport'");
                 habit.setCategory(categoryRepository.findCategoryByNameIgnoreCase(new JSONObject(cateName).getString("name")));
                 habit.setIsAiSuggested(true);
                 habitRepository.save(habit);
@@ -345,10 +402,10 @@ public class HabitService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
+        return result ;
     }
 
-    public HabitLog isAlreadyLoggedInPeriod(Habit habit) {
+    public HabitLog isAlreadyCompleeted(Habit habit) {
         LocalDate now = LocalDate.now();
         LocalDate start = getPeriodStart(now, habit.getFrequency());
         List<HabitLog> logs = habitLogRepository.findHabitLogByHabitIdAndLoggedDateBetweenAndApprovalStatus(habit.getId(), start, now, "COMPLETED");
