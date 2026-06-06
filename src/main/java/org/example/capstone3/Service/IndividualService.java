@@ -1,18 +1,22 @@
 package org.example.capstone3.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.In.IndividualDTOIn;
+import org.example.capstone3.DTO.OUT.ReplacementHabit;
+import org.example.capstone3.DTO.OUT.SmartHabit;
+import org.example.capstone3.DTO.OUT.SmartHabitsResponse;
 import org.example.capstone3.DTO.Out.BadgeDTOOut;
 import org.example.capstone3.Models.*;
-import org.example.capstone3.Repository.CategoryRepository;
-import org.example.capstone3.Repository.HabitLogRepository;
-import org.example.capstone3.Repository.IndividualRepository;
-import org.example.capstone3.Repository.ParentRepository;
+import org.example.capstone3.Repository.*;
+import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +32,7 @@ public class IndividualService {
     private final CreatePdfService createPdfService;
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
+    private final BadgeRepository badgeRepository;
 
 
     public List<Individual> getAllIndividuals() {
@@ -157,11 +162,20 @@ public class IndividualService {
             earnedBadges.append("- ").append(b.getTitle()).append("\n");
         }
 
+        List<Badge> allSystemBadges = badgeRepository.findAll();
+        StringBuilder systemBadgesSchema = new StringBuilder();
+        for (Badge b : allSystemBadges) {
+            systemBadgesSchema.append("- ").append(b.getTitle())
+                    .append(" (Required Points: ").append(b.getPointsRequired()).append(")\n");
+        }
+
         String prompt = "User: " + individual.getFullName() + "\n" +
                 "Current Total Points: " + individual.getPoints() + "\n" +
                 "Already Earned Badges:\n" + earnedBadges + "\n" +
-                "Review the current points and analyze which badges are upcoming (Standard milestones: Starter=100, Committed=500, Hero=1000, Legend=2500). " +
-                "Calculate exactly how many points are remaining for each locked badge, and give 2 tailored tips on how to reach them faster.\n" +
+                "Available System Badges & Milestones (From Database):\n" + systemBadgesSchema + "\n" +
+                "Review the user's current points against the system badges available in the database. " +
+                "Identify which badges are still locked, calculate exactly how many points are remaining for each locked badge, " +
+                "and give 2 tailored tips on how to reach the next locked milestone faster.\n" +
                 "Respond ONLY with a raw JSON object containing:\n" +
                 "1. 'currentPoints': Integer\n" +
                 "2. 'upcomingBadges': Array of objects (badgeTitle, requiredPoints, pointsRemaining)\n" +
@@ -171,20 +185,48 @@ public class IndividualService {
         return aiService.callClaudeApi(prompt);
     }
 
-    public String getSmartHabitRoadmap(Integer individualId) {
+    public SmartHabitsResponse getSmartHabitRoadmap(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) {
             throw new ApiException("Individual not found");
         }
 
         Profile profile = individual.getProfile();
-        String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
+        String mainGoal =profile.getMainGoal();
+        String badHabits = profile.getBadHabit();
+        String prompt="";
+        ObjectMapper mapper = new ObjectMapper();
 
-        String prompt = "Create a long-term 'Smart Habit Roadmap' divided into progressive phases for goal: \"" + mainGoal + "\" in JSON object format. " +
-                "Provide specific habits, category, and expected points for each phase. Respond ONLY with raw JSON.";
+        if(mainGoal!=null)
+             prompt = "Create a 'Smart Habit' to achieve goal: \"" + mainGoal + "\" in JSON object format. " +
+                "Provide specific habits in this format \n"+
+                     "1. 'title': e.g., 'Exercise'\n" +
+                     "2. 'description': e.g., 'Regular exercise for 30 minutes'\n"
+                     +", and expected points for each phase. Respond ONLY with raw JSON.";
+        else
+            prompt = "Create a 'Smart Habit ' to get red of my bad habit : \"" + badHabits + "\" in JSON object format. " +
+                    "Provide specific habits in this format\"smartHabits\" : [ { \"title\" : e.g \"Stop smoking\",\n" +
+                    "  \"description\" : \"Break the habit of nighttime eating by establishing a structured evening routine and healthier alternatives\",\n" +
+                    "  \"targetBadHabit : e.g eating at night\",\n" +
+                    "  \"replacementHabits\" : [ {\n"+
+                    "1. 'title': e.g., 'Exercise'\n" +
+                    "2. 'description': e.g., 'Regular exercise for 30 minutes  }] }]}'\n"
+                    +", Respond ONLY with raw JSON.";
 
-        return aiService.callClaudeApi(prompt);
+        String responseAi = aiService.callClaudeApi(prompt);
+        ObjectMapper objectMapper = new ObjectMapper();
+        SmartHabitsResponse response =null;
+        try {
+
+            //get the json string from the response and map it to my custom DTO
+             response = objectMapper.readValue(responseAi, SmartHabitsResponse.class);
+
+        }catch (Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+        return response;
     }
+
 
     public void sendIndividualRoadmapReport(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);

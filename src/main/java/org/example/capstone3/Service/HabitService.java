@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.IndividualHabitDTO;
+import org.example.capstone3.DTO.OUT.AiHabitDTOout;
 import org.example.capstone3.DTO.OUT.HabitSummaryDTOout;
 import org.example.capstone3.DTO.OUT.TodayHabitDTO;
 import org.example.capstone3.Models.*;
@@ -59,11 +60,11 @@ public class HabitService {
         return habitRepository.findByChildId(childId);
     }
 
-    public void addHabitIndividual(Integer individualId, IndividualHabitDTO dto) {
+    public void addHabitIndividual(Integer individualId, Integer categoryId, IndividualHabitDTO dto) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
 
-        Category category = categoryRepository.findCategoryById(dto.getCategoryId());
+        Category category = categoryRepository.findCategoryById(categoryId); // جلب من الباث مباشرة
         if (category == null) throw new ApiException("Category not found");
 
         Habit habit = new Habit();
@@ -75,32 +76,38 @@ public class HabitService {
         habit.setCategory(category);
         habit.setStreak(0);
         habit.setHighestStreak(0);
-
-        HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
-
-        habitRepository.save(habit);
-        habitLogRepository.save(habitLog);
-    }
-
-    public void addHabitParent(Integer parentId, Integer childId, Habit habitIn) {
-        Parent parent = getParent(parentId);
-        Child child = getChild(childId);
-
-        if (!parent.getChildren().contains(child)) throw new ApiException("This is not your child");
-
-        Habit habit = modelMapper.map(habitIn, Habit.class);
-        if (habit.getPoints() == null || habit.getPoints() == 0) habit.setPoints(10);
-        habit.setStreak(0);
-        habit.setHighestStreak(0);
-        habit.setIsAiSuggested(false);
-        habit.setParent(parent);
-        habit.setChild(child);
+        if (dto.getPoints() != null) habit.setPoints(dto.getPoints());
 
         HabitLog habitLog = new HabitLog(null, LocalDate.now(), "NOT_STARTED", null, null, habit);
 
         habitRepository.save(habit);
         habitLogRepository.save(habitLog);
     }
+
+    public void addHabitParent(Integer parentId, Integer childId, Integer categoryId, Habit habitIn) {
+        Parent parent = getParent(parentId);
+        Child child = getChild(childId);
+        if (!parent.getChildren().contains(child)) throw new ApiException("This is not your child");
+
+        Category category = categoryRepository.findCategoryById(categoryId);
+        if (category == null) throw new ApiException("Category not found");
+
+        Habit habit = modelMapper.map(habitIn, Habit.class);
+        if (habit.getPoints() == null || habit.getPoints() == 0) habit.setPoints(10);
+        habit.setStreak(0);
+        habit.setHighestStreak(0);
+        habit.setFrequency("DAILY");
+        habit.setIsAiSuggested(false);
+        habit.setParent(parent);
+        habit.setChild(child);
+        habit.setCategory(category);
+
+        HabitLog habitLog = new HabitLog(null, LocalDate.now(), "NOT_STARTED", null, null, habit);
+
+        habitRepository.save(habit);
+        habitLogRepository.save(habitLog);
+    }
+
 
     public void updateHabit(Integer habitId, IndividualHabitDTO dto) {
         Habit oldHabit = habitRepository.findHabitById(habitId);
@@ -208,7 +215,7 @@ public class HabitService {
             String lang="arabic";
             String message=aiService.generateWhatsAppMessage(topic,tone,lang);
             Parent parent=getParent(habit.getParent().getId());
-            whatsAppService.whatsAppMessage(parent.getPhoneNumber(),message);
+            whatsAppService.whatsAppMessage("0542381757",message);
         }
 
         habitLogRepository.save(log);
@@ -366,7 +373,7 @@ public class HabitService {
         return habitRepository.findHabitsByCategory_Id(categoryId);
     }
 
-    public String generateHabits(Integer individualId) {
+    public List<AiHabitDTOout> generateHabits(Integer individualId) {
 
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) {
@@ -388,9 +395,10 @@ public class HabitService {
 
         String result=aiService.callClaudeApi(prompt);
         ObjectMapper mapper = new ObjectMapper();
+        List<Habit> routines=new ArrayList<>();
         try {
             // convert json array string to List<Routine>
-            List<Habit> routines = mapper.readValue(result, new TypeReference<List<Habit>>(){});
+             routines = mapper.readValue(result, new TypeReference<List<Habit>>(){});
 
             // Print the parsed titles
             for (Habit routine : routines) {
@@ -404,7 +412,11 @@ public class HabitService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result ;
+        List<AiHabitDTOout> resultList=new ArrayList<>();
+        for (Habit routine : routines) {
+            resultList.add(modelMapper.map(routine,AiHabitDTOout.class));
+        }
+        return resultList ;
     }
 
     public HabitLog isAlreadyCompleeted(Habit habit) {
