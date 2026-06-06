@@ -24,10 +24,6 @@ public class RewardDTOIn {
     @Min(1)
     private Integer requiredPoints;
 
-    @NotNull(message = "Parent ID is required")
-    private Long parentId;
 
-    @NotNull(message = "Habit ID is required")
-    private Integer habitId;
 
 }

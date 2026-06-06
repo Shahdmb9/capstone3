@@ -20,13 +20,13 @@ public class HabitDTOIn {
     private String frequency;
 
     @Min(1)
-    private Integer points = 10;
+    private Integer points;
 
-    private Boolean isAiSuggested = false;
+    private Boolean isAiSuggested;
 
-    // Only one should be provided
+
     private Integer individualId;
-    private Long parentId;
+    private Integer parentId;
     private Integer childId;
 
     @NotNull(message = "Category is required")

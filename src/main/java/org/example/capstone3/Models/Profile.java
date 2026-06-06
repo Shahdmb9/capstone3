@@ -36,8 +36,8 @@ public class Profile {
     @JsonIgnore
     private Individual individual;
 
-    /*@OneToOne
+    @OneToOne
     @JoinColumn(name = "child_id", referencedColumnName = "id")
     @JsonIgnore
-    private Child child;*/
+    private Child child;
 }

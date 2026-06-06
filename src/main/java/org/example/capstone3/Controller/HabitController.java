@@ -1,3 +1,7 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
 package org.example.capstone3.Controller;
 
 import jakarta.validation.Valid;
@@ -16,50 +20,118 @@ public class HabitController {
 
     private final HabitService habitService;
 
-
     @GetMapping("/get-individual-habits/{individualId}")
     public ResponseEntity<?> getIndividualHabits(@PathVariable Integer individualId) {
-        return ResponseEntity.status(200).body(habitService.getIndividualHabits(individualId));
+        return ResponseEntity.status(200).body(this.habitService.getIndividualHabits(individualId));
     }
+
     @GetMapping("/get-parent-habit/{parentId}")
     public ResponseEntity<?> getParentHabits(@PathVariable Integer parentId) {
-        return ResponseEntity.status(200).body(habitService.getParentHabits(parentId));
+        return ResponseEntity.status(200).body(this.habitService.getParentHabits(parentId));
     }
+
     @GetMapping("/get-child-habit/{childId}")
     public ResponseEntity<?> getChildHabits(@PathVariable Integer childId) {
-        return ResponseEntity.status(200).body(habitService.getChildHabits(childId));
+        return ResponseEntity.status(200).body(this.habitService.getChildHabits(childId));
     }
 
-   /* @PostMapping("/add-habit-individual")
-    public ResponseEntity<ApiResponse> addHabitIndividual(@RequestBody @Valid IndividualHabitDTO dto) {
-        habitService.addHabitIndividual(dto);
+    @PostMapping("/add-habit-individual/{individualId}")
+    public ResponseEntity<ApiResponse> addHabitIndividual(@PathVariable Integer individualId, @RequestBody @Valid IndividualHabitDTO dto) {
+        this.habitService.addHabitIndividual(individualId, dto);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
-    }*/
+    }
 
     @PostMapping("/add-habit-parent/{parentId}/{childId}")
-    public ResponseEntity<ApiResponse> addHabitParent(@PathVariable Integer parentId,@PathVariable Integer childId, @RequestBody @Valid Habit habit) {
-        habitService.addHabitParent(parentId,childId,habit);
+    public ResponseEntity<ApiResponse> addHabitParent(@PathVariable Integer parentId, @PathVariable Integer childId, @RequestBody @Valid Habit habit) {
+        this.habitService.addHabitParent(parentId, childId, habit);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
     }
 
-
-
     @PutMapping("/update/{habitId}")
-    public ResponseEntity<ApiResponse> updateHabit(@PathVariable Integer habitId, @RequestBody @Valid IndividualHabitDTO dto) {
-        habitService.updateHabit(habitId, dto);
+    public ResponseEntity<ApiResponse> updateHabit(@PathVariable Integer habitId, @RequestBody IndividualHabitDTO dto) {
+        this.habitService.updateHabit(habitId, dto);
         return ResponseEntity.status(200).body(new ApiResponse("Habit updated successfully"));
     }
 
     @DeleteMapping("/delete/{habitId}")
     public ResponseEntity<ApiResponse> deleteHabit(@PathVariable Integer habitId) {
-        habitService.deleteHabit(habitId);
+        this.habitService.deleteHabit(habitId);
         return ResponseEntity.status(200).body(new ApiResponse("Habit deleted successfully"));
     }
 
 
-    /*@PostMapping("/complete/{habitId}")
-    public ResponseEntity<ApiResponse> completeHabitToday(@PathVariable Integer habitId) {
-        habitService.completeHabitToday(habitId);
-        return ResponseEntity.status(200).body(new ApiResponse("Habit executed and points credited successfully"));
-    }*/
+    @PutMapping("/complete-habit/{habitId}")
+    public ResponseEntity<ApiResponse> completeHabit(@PathVariable Integer habitId) {
+        this.habitService.logHabit(habitId);
+        return ResponseEntity.status(200).body(new ApiResponse("Habit completed successfully"));
+    }
+
+    @PutMapping("/review-log-of-child/{parentId}/{habitId}/{status}")
+    public ResponseEntity<ApiResponse> reviewHabit(@PathVariable Integer parentId, @PathVariable Integer habitId, @PathVariable String status) {
+        this.habitService.reviewChildLog(parentId, habitId, status);
+        return ResponseEntity.status(200).body(new ApiResponse("Habit reviewed and updated successfully"));
+    }
+
+    @GetMapping("/ai-habits/{individualId}")
+    public ResponseEntity<?> generateHabits(@PathVariable Integer individualId){
+        return ResponseEntity.status(200).body(this.habitService.generateHabits(individualId));
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<?> getHabitsByCategory(@PathVariable Integer categoryId) {
+        return ResponseEntity.status(200).body(habitService.getHabitsByCategory(categoryId));
+    }
+
+    @PutMapping("/accept-habit-suggested/{individualId}/{habitId}")
+    public ResponseEntity<?> acceptHabitSuggestedByAI(@PathVariable Integer individualId, @PathVariable Integer habitId){
+        habitService.acceptHabitSuggestedByAI(individualId, habitId);
+        return ResponseEntity.status(200).body(new ApiResponse("Habit accepted successfully"));
+    }
+
+    @GetMapping("/get-ai-habit-suggested/{individualId}")
+    public ResponseEntity<?> getAiSuggested(@PathVariable Integer individualId){
+        return ResponseEntity.status(200).body(habitService.AISuggestedHabit(individualId));
+    }
+
+    @GetMapping("/ia_risk_prediction/{id}")
+    public ResponseEntity<?> riskPrediction(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(habitService.riskPrediction(id));
+    }
+
+    @GetMapping("/ia_best_habit_time/{id}")
+    public ResponseEntity<?> BestHabitTime(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(habitService.BestHabitTime(id));
+    }
+
+    @GetMapping("/{habitId}/ai/improvement")
+    public ResponseEntity<String> getHabitImprovementAdvisor(@PathVariable Integer habitId) {
+        return ResponseEntity.status(200).body(habitService.getHabitImprovementAdvisor(habitId));
+    }
+
+    @GetMapping("/{habitId}/ai/commitment")
+    public ResponseEntity<String> getHabitCommitmentAnalysis(@PathVariable Integer habitId) {
+        return ResponseEntity.status(200).body(habitService.getHabitCommitmentAnalysis(habitId));
+    }
+
+    @GetMapping("/get-today-habits-Individual/{id}")
+    public ResponseEntity<?> getTodayHabitsForIndividual(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(habitService.getTodayHabitsForIndividual(id));
+    }
+
+    @GetMapping("/get-today-habits-child/{childId}")
+    public ResponseEntity<?> getTodayHabitsForChild(@PathVariable Integer childId) {
+        return ResponseEntity.status(200).body(habitService.getTodayHabitsForChild (childId));
+    }
+
+    @GetMapping("/habit-summary/{habitId}")
+    public ResponseEntity<?> getHabitSummary(@PathVariable Integer habitId) {
+        return ResponseEntity.status(200).body(habitService.getHabitSummary(habitId));
+    }
+
+    @DeleteMapping("/delete-all-ai-suggested/{individualId}")
+    public ResponseEntity<?> deleteAllAiSuggested(@PathVariable Integer individualId) {
+        habitService.deleteAllAiSuggested(individualId);
+        return ResponseEntity.status(200).body(new ApiResponse("All AI suggested habits deleted successfully"));
+    }
+
 }

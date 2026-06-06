@@ -5,12 +5,16 @@ package org.example.capstone3.Service;
 import lombok.RequiredArgsConstructor;
 
 import org.example.capstone3.API.ApiException;
+import org.example.capstone3.DTO.In.RewardDTOIn;
+import org.example.capstone3.Models.Child;
 import org.example.capstone3.Models.Habit;
 import org.example.capstone3.Models.Parent;
 import org.example.capstone3.Models.Reward;
+import org.example.capstone3.Repository.ChildRepository;
 import org.example.capstone3.Repository.HabitRepository;
 import org.example.capstone3.Repository.ParentRepository;
 import org.example.capstone3.Repository.RewardRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,12 +26,14 @@ public class RewardService {
     private final RewardRepository rewardRepository;
     private final ParentRepository parentRepository;
     private final HabitRepository habitRepository;
+    private  final ModelMapper modelMapper;
+    private final ChildRepository childRepository;
 
     public List<Reward> getAllRewards(){
         return rewardRepository.findAll();
     }
 
-    public void add(Integer parentId, Integer habitId, Reward reward) {
+    public void add(Integer parentId, Integer habitId, RewardDTOIn rewardIn) {
         Parent parent = parentRepository.findParentById(parentId);
         if (parent == null) throw new ApiException("Parent not found");
 
@@ -38,19 +44,24 @@ public class RewardService {
             throw new ApiException("This habit already has a reward linked to it");
         }
 
-        reward.setParent(parent);
+        Reward reward = modelMapper.map(rewardIn, Reward.class);
+
         reward.setHabit(habit);
-        reward.setId(habit.getId());
+        reward.setParent(parent);
 
         habit.setReward(reward);
-        rewardRepository.save(reward);
+
+        habitRepository.save(habit);
     }
 
 
 
 
-    public void update(Integer id,Reward reward){
+
+    public void update(Integer id,RewardDTOIn rewardIn){
+        Reward reward = modelMapper.map(rewardIn,Reward.class);
         Reward oldReward=getRewardById(id);
+        if(oldReward==null) throw new ApiException("Reward not found");
         oldReward.setTitle(reward.getTitle());
         oldReward.setDescription(reward.getDescription());
         oldReward.setRequiredPoints(reward.getRequiredPoints());
@@ -59,6 +70,7 @@ public class RewardService {
 
     public void delete(Integer id){
         Reward reward=getRewardById(id);
+        if(reward==null) throw new ApiException("Reward not found");
         rewardRepository.delete(reward);
     }
 
@@ -69,5 +81,8 @@ public class RewardService {
             throw new ApiException("Reward not found");
         return reward;
     }
+
+
+
 
 }

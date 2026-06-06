@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile, Integer> {
-    Profile findProfileById(Integer id);
+
+    Profile findProfileByIndividualId(Integer individualId);
+
+    Profile findProfileByChildId(Integer childId);
 }
 

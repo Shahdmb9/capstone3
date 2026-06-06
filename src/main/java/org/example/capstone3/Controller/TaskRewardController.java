@@ -2,10 +2,8 @@ package org.example.capstone3.Controller;
 
 
 import org.example.capstone3.API.ApiResponse;
-import org.example.capstone3.DTO.In.TaskDTOIn;
 import org.example.capstone3.DTO.In.TaskRewardDTOIn;
 import org.example.capstone3.Service.TaskRewardService;
-import org.example.capstone3.Service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

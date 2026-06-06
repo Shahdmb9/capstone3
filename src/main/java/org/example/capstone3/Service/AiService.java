@@ -3,6 +3,9 @@ package org.example.capstone3.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
+import org.example.capstone3.Models.Child;
+import org.example.capstone3.Models.Habit;
+import org.example.capstone3.Models.Parent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,20 +25,120 @@ public class AiService {
     @Value("${anthropic.api.key}")
     private String anthropicApiKey;
 
-
-    private String buildPrompt (){
+    public  String buildPromptFamilyActivity(Parent parent , String weatherInfo ){
         StringBuilder sb = new StringBuilder();
-        sb.append("You are an expert  project evaluator.\n\n");
-        sb.append("Project Details:\n");
+        sb.append("You are a family activity advisor.\n\n");
+        sb.append("family info:\n");
+        sb.append("- Parent: ").append(parent.getFullName()).append("\n");
+        sb.append("- Number of children: ").append(parent.getChildren().size()).append("\n");
+        sb.append("\nCurrent Weather:\n");
+        sb.append("- ").append(weatherInfo).append("\n\n");
+
+        sb.append("Based on the weather and children's ages, suggest family activities.\n");
+        sb.append("Respond ONLY in this exact JSON format:\n");
+        sb.append("{\n");
+        sb.append("  \"weatherSummary\": \"brief weather description\",\n");
+        sb.append("  \"activities\": [\n");
+        sb.append("    {\n");
+        sb.append("      \"name\": \"activity name\",\n");
+        sb.append("      \"description\": \"what to do\",\n");
+        sb.append("      \"duration\": \"e.g. 1-2 hours\",\n");
+        sb.append("      \"location\": \"Indoor / Outdoor\"\n");
+        sb.append("    }\n");
+        sb.append("  ],\n");
+        sb.append("  \"tip\": \"one bonus tip for the family today\"\n");
+        sb.append("}\n");
+
+        return sb.toString();
+
+    }
+    public String buildPromptRiskPrediction (Habit habit){
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are an expert habit analyst and risk evaluator.\n\n");
+        sb.append("habit Details:\n");
+        sb.append("- Name: ").append(habit.getTitle()).append("\n");
+        sb.append("- Description: ").append(habit.getDescription()).append("\n");
+        sb.append("- Frequency: ").append(habit.getFrequency()).append("\n");
+        sb.append("- Points: ").append(habit.getPoints()).append("\n");
 
 
-        sb.append("Please evaluate each proposal and:\n");
-        sb.append("1. Give each proposal a score out of 10\n");
-        sb.append("2. Explain why in 2-3 sentences\n");
-        sb.append("3. Recommend the BEST proposal with clear reasoning\n");
-        sb.append("4. Format your response in a clear, structured way\n");
+        sb.append("Please evaluate and Predict the risk  and:\n");
+        sb.append("1. Predict the risk level of failing this habit (Low / Medium / High)\n");
+        sb.append("2. Give a risk score out of 10 (10 = highest risk)\\n");
+        sb.append("3. Provide a recommendation to reduce the risk\n");
+        sb.append("4. Format your response in a clear, structured way \n");
+        sb.append("Respond ONLY in this exact JSON format:\n");
+        sb.append("{\n");
+        sb.append("  \"riskLevel\": \"Low | Medium | High\",\n");
+        sb.append("  \"riskScore\": 0-10,\n");
+        sb.append("  \"explanation\": \"...\",\n");
+        sb.append("  \"recommendation\": \"...\"\n");
+        sb.append("}\n");
+        return sb.toString() ;
+    }
+    public String buildPromptBestTime(Habit habit){
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are an expert habit analyst and  evaluator.\n\n");
+        sb.append("Habit Details:\n");
+        sb.append("- Name: ").append(habit.getTitle()).append("\n");
+        sb.append("- Description: ").append(habit.getDescription()).append("\n");
+        sb.append("- Frequency: ").append(habit.getFrequency()).append("\n");
+        sb.append("- Points: ").append(habit.getPoints()).append("\n");
+
+
+        sb.append("Based on this habit, recommend the best time of day to perform it.\n");
+        sb.append("Respond ONLY in this exact JSON format:\n");
+        sb.append("{\n");
+        sb.append("  \"bestTimeRange\": \"e.g. 7:00 AM - 9:00 AM\",\n");
+        sb.append("  \"reason\": \"short explanation why this time works best\",\n");
+        sb.append("  \"alternativeTime\": \"e.g. 6:00 PM - 7:00 PM\"\n");
+        sb.append("}\n");
 
         return sb.toString() ;
+
+    }
+    public  String buildPromptFamilyScore(Parent  parent)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are an expert family behavioral analyst and  evaluator.\n\n");
+        sb.append("Family: ").append(parent.getFullName()).append("\n\n");
+        sb.append("Children Performance Data:\n");
+        for (Child child : parent.getChildren()) {
+            long completedTasks = child.getTask().stream()
+                    .flatMap(t -> t.getTaskApplications().stream())
+                    .filter(app -> "APPROVED".equalsIgnoreCase(app.getApprovalStatus()))
+                    .count();
+
+            long totalTasks = child.getTask().stream()
+                    .flatMap(t -> t.getTaskApplications().stream())
+                    .count();
+
+            long completedHabits = child.getHabit().stream()
+                    .flatMap(h -> h.getLogs().stream())
+                    .filter(log -> "COMPLETED".equalsIgnoreCase(log.getApprovalStatus()))
+                    .count();
+
+            long totalHabits = child.getHabit().stream()
+                    .flatMap(h -> h.getLogs().stream())
+                    .count();
+
+            sb.append("- Child: ").append(child.getFullName()).append("\n");
+            sb.append("  Tasks Completed: ").append(completedTasks).append(" / ").append(totalTasks).append("\n");
+            sb.append("  Habits Completed: ").append(completedHabits).append(" / ").append(totalHabits).append("\n");
+            sb.append("  Points: ").append(child.getPoints()).append("\n\n");
+        }
+        sb.append("Based on this data, respond ONLY in this exact JSON format:\n");
+        sb.append("{\n");
+        sb.append("  \"familyScore\": 0-100,\n");
+        sb.append("  \"familyScoreLabel\": \"e.g. Excellent / Good / Needs Improvement\",\n");
+        sb.append("  \"bestChild\": \"child name\",\n");
+        sb.append("  \"bestChildReason\": \"why this child is the best\",\n");
+        sb.append("  \"mostImprovedChild\": \"child name\",\n");
+        sb.append("  \"mostImprovedReason\": \"why this child shows the most growth\",\n");
+        sb.append("  \"familyAdvice\": \"one actionable tip for the whole family\"\n");
+        sb.append("}\n");
+        return sb.toString();
+
     }
     public  String callClaudeApi(String prompt){
         RestTemplate restTemplate = new RestTemplate();
@@ -73,6 +176,21 @@ public class AiService {
         } catch (Exception e) {
             throw new ApiException("AI evaluation failed: " + e.getMessage());
         }
+    }
+
+    public String generateWhatsAppMessage(String topic, String tone, String language) {
+        String prompt = String.format(
+                "Generate a WhatsApp message about: %s\n" +
+                        "Tone: %s\n" +
+                        "Language: %s\n\n" +
+                        "Requirements:\n" +
+                        "- Keep it concise and suitable for WhatsApp\n" +
+                        "- Use appropriate emojis\n" +
+                        "- Make it personal and engaging\n" +
+                        "- Return ONLY the message text, nothing else",
+                topic, tone, language
+        );
+        return callClaudeApi(prompt);
     }
 
 }

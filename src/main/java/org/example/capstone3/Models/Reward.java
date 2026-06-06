@@ -40,11 +40,13 @@ public class Reward {
 
     @ManyToOne
     @JoinColumn(name = "parent_id", referencedColumnName = "id")
+    @JsonIgnore
     private Parent parent;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "habit_id")
+    @JsonIgnore
     private Habit habit;
 
 
