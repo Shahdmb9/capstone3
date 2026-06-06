@@ -350,6 +350,7 @@ public class HabitService {
     public HabitLog createHabitLog(Habit habit) {
         HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
         habitLogRepository.save(habitLog);
+        return habitLog;
     }
 
     public List<Habit> AISuggestedHabit(Integer individualId) {
