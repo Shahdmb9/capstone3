@@ -7,8 +7,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 
 # HABIT SYSTEM ENDPOINTS (CAPSTONE 3)
 
-### 1-Individual Controller & Service 
-
+### 1-Individual Path 
 
 | HTTP Method | API Path |
 | :--- | :--- |
@@ -17,8 +16,8 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `GET` | `/api/v1/individual/{individualId}/ai/achievement-index` |
 | `GET` | `/api/v1/individual/{individualId}/ai/badges-progress` |
 
-### 2-Parent Controller & Service 
 
+### 2-Parent 
 
 | HTTP Method | API Path |
 | :--- | :--- |
@@ -26,8 +25,8 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `GET` | `/api/v1/parent/{parentId}/children/{childId}/ai/behavior` |
 | `GET` | `/api/v1/parent/{parentId}/children/{childId}/ai/recommended-rewards` |
 
-### 3-Habit Controller & Service 
 
+### 3-Habit
 
 | HTTP Method | API Path |
 | :--- | :--- |
@@ -36,8 +35,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `GET` | `/api/v1/habit/{habitId}/ai/improvement` |
 | `GET` | `/api/v1/habit/{habitId}/ai/commitment` |
 
-### 4-Reward & Task Reward Controllers 
-
+### 4-Reward & Task Reward 
 
 | HTTP Method | API Path |
 | :--- | :--- |
