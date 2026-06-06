@@ -71,4 +71,8 @@ public class ControllerAdvice {
     public ResponseEntity<ApiResponse> MethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         return ResponseEntity.status(400).body(new ApiResponse(e.getMessage()));
     }
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<ApiResponse> RuntimeException(RuntimeException e) {
+        return ResponseEntity.status(400).body(new ApiResponse(e.getMessage()));
+    }
 }

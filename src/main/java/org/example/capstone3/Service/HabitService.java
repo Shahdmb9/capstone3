@@ -138,9 +138,11 @@ public class HabitService {
         Individual individual = getIndividual(individualId);
         List<TodayHabitDTO> result = new ArrayList<>();
         for (Habit habit : individual.getHabits()) {
-            HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, LocalDate.now());
-            result.add(new TodayHabitDTO(habit.getId(),log.getId(), habit.getTitle(),
-                    habit.getDescription(), habit.getPoints(), habit.getStreak(),habit.getHighestStreak(), log.getApprovalStatus()));
+            if(habit.getIsAiSuggested()==false) {
+                HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, LocalDate.now());
+                result.add(new TodayHabitDTO(habit.getId(), log.getId(), habit.getTitle(),
+                        habit.getDescription(), habit.getPoints(), habit.getStreak(), habit.getHighestStreak(), log.getApprovalStatus()));
+            }
         }
         return result;
 
@@ -450,7 +452,7 @@ public class HabitService {
         List<HabitLog> logs = habitLogRepository.findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
         int completedCount = logs.size();
 
-        String prompt = "Analyze commitment for Habit:\n- Title: " + habit.getTitle() + "\n- Total Successful Logs: " + completedCount + "\nReturn JSON with commitmentPercentage, streakStatus, actionRequired.";
+        String prompt = "Analyze commitment for Habit:\n- Title: " + habit.getTitle() + "\n- Total Successful Logs: " + completedCount + "\nReturn JSON with commitmentPercentage, actionRequired.";
         return aiService.callClaudeApi(prompt);
     }
 
@@ -458,10 +460,24 @@ public class HabitService {
         Habit habit = habitRepository.findHabitById(habitId);
         if (habit == null) throw new ApiException("Habit not found");
 
+        String categoryName = (habit.getCategory() != null) ? habit.getCategory().getName() : "General";
+
         List<HabitLog> completedLogs = habitLogRepository.findByHabitAndApprovalStatus(habit, "COMPLETED");
-        String prompt = "Provide optimization advice for Habit: " + habit.getTitle() + "\nReturn JSON with currentStatus, improvementTips, streakMilestoneGoal.";
+        int totalCompletedCount = completedLogs != null ? completedLogs.size() : 0;
+        int currentStreak = habit.getStreak() != null ? habit.getStreak() : 0;
+
+        String prompt = "Analyze this habit data: Name: " + habit.getTitle() + ", Category: " + categoryName +
+                ", Current Streak: " + currentStreak + ", Total Completed: " + totalCompletedCount + ".\n" +
+                "Return ONLY a raw JSON object with exactly these fields. Do not include markdown or text before/after:\n" +
+                "{\n" +
+                "  \"habitName\": \"" + habit.getTitle() + "\",\n" +
+                "  \"categoryName\": \"" + categoryName + "\",\n" +
+                "  \"threeImprovementTips\": [\"First specific tip based on logs\", \"Second specific tip\", \"Third specific tip\"]\n" +
+                "}";
+
         return aiService.callClaudeApi(prompt);
     }
+
 
     public String riskPrediction(Integer id) {
         Habit habit = habitRepository.findHabitById(id);

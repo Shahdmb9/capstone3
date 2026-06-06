@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +35,7 @@ public class Child {
     private String email ;
 
     @Column(nullable = false )
-    @NotEmpty(message = "Phone number cannot be empty")
+    @NotNull(message = "Age cannot be empty")
     private Integer age ;
 
     @Column(nullable = false )
