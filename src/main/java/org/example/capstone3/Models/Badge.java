@@ -1,5 +1,6 @@
 package org.example.capstone3.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -32,5 +33,6 @@ public class Badge {
     private Integer pointsRequired;
 
     @ManyToMany(mappedBy = "badges")
+    @JsonIgnore
     private Set<Individual> individuals;
 }

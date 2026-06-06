@@ -17,16 +17,18 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    public void sendReportByEmail(String toEmail, byte[] pdfBytes, String name) {
+    public void sendReportByEmail(String toEmail, byte[] pdfBytes, String name, String subjectTitle) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(fromEmail);
             helper.setTo(toEmail);
-            helper.setSubject(name + " Your  Children Performance Report ");
-            helper.setText("your  Children Performance Report  attached.");
+
+            helper.setSubject(name + " - " + subjectTitle);
+            helper.setText("Your requested report is compiled and attached below.");
+
             helper.addAttachment(
-                    " Children_Performance_Report " + name + ".pdf",
+                    subjectTitle.replace(" ", "_") + "_" + name + ".pdf",
                     new ByteArrayResource(pdfBytes),
                     "application/pdf"
             );

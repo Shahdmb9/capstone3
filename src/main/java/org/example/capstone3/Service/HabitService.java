@@ -32,7 +32,8 @@ public class HabitService {
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
     private final AiService aiService;
-    private final BadgeService badgeService;
+    private final RewardRepository rewardRepository;
+    private final BadgeRepository badgeRepository;
 
     //creating logs for the users evrey say
     @Scheduled(cron = "0 0 0 * * *")
@@ -68,7 +69,7 @@ public class HabitService {
         Habit habit = new Habit();
         habit.setTitle(dto.getTitle());
         habit.setDescription(dto.getDescription());
-        habit.setFrequency(dto.getFrequency().toUpperCase());
+        habit.setFrequency("DAILY");
         habit.setIsAiSuggested(false);
         habit.setIndividual(individual);
         habit.setCategory(category);
@@ -95,7 +96,7 @@ public class HabitService {
         habit.setParent(parent);
         habit.setChild(child);
 
-        HabitLog habitLog=createHabitLog(habit);
+        HabitLog habitLog = new HabitLog(null, LocalDate.now(), "NOT_STARTED", null, null, habit);
 
         habitRepository.save(habit);
         habitLogRepository.save(habitLog);
@@ -194,7 +195,8 @@ public class HabitService {
             if (individual != null) {
                 individual.setPoints(individual.getPoints() + habit.getPoints());
                 individualRepository.save(individual);
-                badgeService.checkAndAssignBadges(individual.getId());
+
+                checkAndAssignBadgesToIndividual(individual);
             }
         } else {
             Child child = habit.getChild();
@@ -210,6 +212,27 @@ public class HabitService {
         habitLogRepository.save(log);
         habitRepository.save(habit);
     }
+
+    private void checkAndAssignBadgesToIndividual(Individual individual) {
+        List<Badge> allBadges = badgeRepository.findAll();
+
+        for (Badge badge : allBadges) {
+            if (individual.getPoints() >= badge.getPointsRequired()) {
+
+                if (!individual.getBadges().contains(badge)) {
+
+                    individual.getBadges().add(badge);
+                    badge.getIndividuals().add(individual);
+
+                    badgeRepository.save(badge);
+                    System.out.println("Badge '" + badge.getTitle() + "' successfully awarded to: " + individual.getFullName());
+                }
+            }
+        }
+        individualRepository.save(individual);
+    }
+
+
 
     public void reviewChildLog(Integer parentId, Integer habitId, String status) {
         if (!status.matches("^(NOT_STARTED|PENDING|COMPLETED|REJECTED)$"))
@@ -245,15 +268,22 @@ public class HabitService {
                 if (log.getHabit().getReward() != null) {
                     Reward reward = log.getHabit().getReward();
                     if (child.getPoints() >= reward.getRequiredPoints()) {
-                        System.out.println("Child target achieved for: " + reward.getTitle());
-                    }
+                        child.setPoints(child.getPoints() - reward.getRequiredPoints());
+
+                        reward.setClaimedAt(java.time.LocalDateTime.now());
+
+                        rewardRepository.save(reward);                    }
                 }
             }
+            childRepository.save(child);
             habitRepository.save(log.getHabit());
         }
     }
 
     public void updateStreak(Habit habit) {
+        if (habit.getStreak() == null) habit.setStreak(0);
+        if (habit.getHighestStreak() == null) habit.setHighestStreak(0);
+
         LocalDate today = LocalDate.now();
 
         List<HabitLog> recentLogs = habitLogRepository.findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
@@ -290,7 +320,6 @@ public class HabitService {
     }
 
 
-
     public Habit getHabitById(Integer habitId) {
         Habit habit = habitRepository.findHabitById(habitId);
         if (habit == null)
@@ -321,7 +350,6 @@ public class HabitService {
     public HabitLog createHabitLog(Habit habit) {
         HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
         habitLogRepository.save(habitLog);
-        return habitLog;
     }
 
     public List<Habit> AISuggestedHabit(Integer individualId) {

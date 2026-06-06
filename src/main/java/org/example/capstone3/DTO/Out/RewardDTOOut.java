@@ -10,11 +10,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RewardDTOOut {
-    private Integer id;
     private String title;
     private String description;
     private Integer requiredPoints;
-    private LocalDateTime claimedAt;
     private String parentName;
     private String habitTitle;
 
