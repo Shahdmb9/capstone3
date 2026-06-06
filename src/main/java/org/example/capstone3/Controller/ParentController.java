@@ -83,6 +83,14 @@ public class ParentController {
         return ResponseEntity.status(200).body(parentService.getPendingHabit(parentId));
     }
 
+    @GetMapping("/family_discipline_score/{id}/{city}")
+    public  ResponseEntity<?> getFamilyActivity(@PathVariable Integer id , @PathVariable String city) {
+        return ResponseEntity.status(200).body(parentService.getFamilyActivity(id, city));
+    }
+    @GetMapping("/leaderboard/{id}")
+    public  ResponseEntity<?> getFamilyLeaderboard(@PathVariable Integer id ) {
+        return ResponseEntity.status(200).body(parentService.getFamilyLeaderboard(id));
+    }
     @GetMapping("/{parentId}/family-discipline-score")
     public ResponseEntity<String> getFamilyDisciplineScore(@PathVariable Integer parentId) {
         return ResponseEntity.status(200).body(parentService.FamilyDisciplineScore(parentId));

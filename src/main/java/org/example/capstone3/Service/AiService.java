@@ -25,7 +25,33 @@ public class AiService {
     @Value("${anthropic.api.key}")
     private String anthropicApiKey;
 
+    public  String buildPromptFamilyActivity(Parent parent , String weatherInfo ){
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are a family activity advisor.\n\n");
+        sb.append("family info:\n");
+        sb.append("- Parent: ").append(parent.getFullName()).append("\n");
+        sb.append("- Number of children: ").append(parent.getChildren().size()).append("\n");
+        sb.append("\nCurrent Weather:\n");
+        sb.append("- ").append(weatherInfo).append("\n\n");
 
+        sb.append("Based on the weather and children's ages, suggest family activities.\n");
+        sb.append("Respond ONLY in this exact JSON format:\n");
+        sb.append("{\n");
+        sb.append("  \"weatherSummary\": \"brief weather description\",\n");
+        sb.append("  \"activities\": [\n");
+        sb.append("    {\n");
+        sb.append("      \"name\": \"activity name\",\n");
+        sb.append("      \"description\": \"what to do\",\n");
+        sb.append("      \"duration\": \"e.g. 1-2 hours\",\n");
+        sb.append("      \"location\": \"Indoor / Outdoor\"\n");
+        sb.append("    }\n");
+        sb.append("  ],\n");
+        sb.append("  \"tip\": \"one bonus tip for the family today\"\n");
+        sb.append("}\n");
+
+        return sb.toString();
+
+    }
     public String buildPromptRiskPrediction (Habit habit){
         StringBuilder sb = new StringBuilder();
         sb.append("You are an expert habit analyst and risk evaluator.\n\n");
