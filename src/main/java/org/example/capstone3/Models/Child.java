@@ -50,7 +50,6 @@ public class Child {
     private Set<Task> task=new HashSet<>();
 
     @OneToOne(mappedBy = "child", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
     private Profile profile;
 
 }

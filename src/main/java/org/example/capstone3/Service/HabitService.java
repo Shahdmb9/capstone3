@@ -30,7 +30,8 @@ public class HabitService {
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
     private final AiService aiService;
-    private final BadgeService badgeService;
+    private final RewardRepository rewardRepository;
+    private final BadgeRepository badgeRepository;
 
     @Scheduled(cron = "0 0 0 * * *")
     public void evaluateHabitsDaily() {
@@ -65,7 +66,7 @@ public class HabitService {
         Habit habit = new Habit();
         habit.setTitle(dto.getTitle());
         habit.setDescription(dto.getDescription());
-        habit.setFrequency(dto.getFrequency().toUpperCase());
+        habit.setFrequency("DAILY");
         habit.setIsAiSuggested(false);
         habit.setIndividual(individual);
         habit.setCategory(category);
@@ -128,45 +129,80 @@ public class HabitService {
         }
 
         log.setLoggedDate(LocalDate.now());
-        boolean isChild = habit.getChild() != null;
+        boolean isChild = (habit.getChild() != null);
+
         log.setApprovalStatus(isChild ? "PENDING" : "COMPLETED");
         habitLogRepository.save(log);
 
         if (!isChild) {
             updateStreak(habit);
             Individual individual = habit.getIndividual();
+
             if (individual != null) {
                 individual.setPoints(individual.getPoints() + habit.getPoints());
                 individualRepository.save(individual);
-                badgeService.checkAndAssignBadges(individual.getId());
+
+                checkAndAssignBadgesToIndividual(individual);
             }
         } else {
-            Parent parent = getParent(habit.getParent().getId());
-            whatsAppService.sendReportByWhatsApp(parent.getPhoneNumber(), parent.getFullName());
+            if (habit.getParent() != null) {
+                Parent parent = getParent(habit.getParent().getId());
+                whatsAppService.sendReportByWhatsApp(parent.getPhoneNumber(), parent.getFullName());
+            }
         }
 
         habitLogRepository.save(log);
         habitRepository.save(habit);
     }
 
+    private void checkAndAssignBadgesToIndividual(Individual individual) {
+        List<Badge> allBadges = badgeRepository.findAll();
+
+        for (Badge badge : allBadges) {
+            if (individual.getPoints() >= badge.getPointsRequired()) {
+
+                if (!individual.getBadges().contains(badge)) {
+
+                    individual.getBadges().add(badge);
+                    badge.getIndividuals().add(individual);
+
+                    badgeRepository.save(badge);
+                    System.out.println("Badge '" + badge.getTitle() + "' successfully awarded to: " + individual.getFullName());
+                }
+            }
+        }
+        individualRepository.save(individual);
+    }
+
+
+
     public void reviewChildLog(Integer parentId, Integer habitId, String status) {
-        if (!status.matches("^(NOT_STARTED|PENDING|COMPLETED|REJECTED)$"))
+        if (!status.matches("^(NOT_STARTED|PENDING|COMPLETED|REJECTED)$")) {
             throw new ApiException("Invalid status");
+        }
 
         Habit habit = getHabitById(habitId);
-        if (habit.getParent() == null) throw new ApiException("This is not a child habit");
+
+        if (habit.getParent() == null || habit.getChild() == null) {
+            throw new ApiException("This is not a child habit");
+        }
 
         HabitLog log = habitLogRepository.findHabitLogByHabit(habit);
-        Parent parent = getParent(parentId);
+        if (log == null) {
+            throw new ApiException("No log found for this habit");
+        }
 
-        if (!parentId.equals(log.getHabit().getParent().getId()))
+        if (!parentId.equals(habit.getParent().getId())) {
             throw new ApiException("You are not the owner of this habit");
+        }
 
-        if (!parent.getChildren().contains(log.getHabit().getChild()))
+        Parent parent = getParent(parentId);
+        if (!parent.getChildren().contains(habit.getChild())) {
             throw new ApiException("This is not your child");
+        }
 
-        if (!log.getApprovalStatus().equals("PENDING")) {
-            throw new RuntimeException("You already checked this habit");
+        if (!"PENDING".equals(log.getApprovalStatus())) {
+            throw new ApiException("You already checked this habit log");
         }
 
         log.setApprovalStatus(status);
@@ -174,22 +210,29 @@ public class HabitService {
         habitLogRepository.save(log);
 
         if ("COMPLETED".equals(status)) {
-            Child child = log.getHabit().getChild();
-            if (child != null) {
-                child.setPoints(child.getPoints() + log.getHabit().getPoints());
-                childRepository.save(child);
-                updateStreak(log.getHabit());
+            Child child = habit.getChild();
 
-                if (log.getHabit().getReward() != null) {
-                    Reward reward = log.getHabit().getReward();
-                    if (child.getPoints() >= reward.getRequiredPoints()) {
-                        System.out.println("Child target achieved for: " + reward.getTitle());
-                    }
+            child.setPoints(child.getPoints() + habit.getPoints());
+            updateStreak(habit);
+
+            if (habit.getReward() != null) {
+                Reward reward = habit.getReward();
+
+                if (child.getPoints() >= reward.getRequiredPoints()) {
+                    child.setPoints(child.getPoints() - reward.getRequiredPoints());
+
+                    reward.setClaimedAt(java.time.LocalDateTime.now());
+
+                    rewardRepository.save(reward);
+                    System.out.println("Reward '" + reward.getTitle() + "' successfully claimed by child: " + child.getFullName());
                 }
             }
-            habitRepository.save(log.getHabit());
+
+            childRepository.save(child);
+            habitRepository.save(habit);
         }
     }
+
 
     public void updateStreak(Habit habit) {
         if (habit.getStreak() == null) habit.setStreak(0);
