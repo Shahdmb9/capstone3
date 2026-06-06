@@ -51,11 +51,6 @@ public class IndividualController {
         return ResponseEntity.status(200).body(new ApiResponse("Interest added successfully"));
     }
 
-    @PostMapping("/{individualId}/ai/recommend-habits")
-    public ResponseEntity<String> recommendHabitsByInterests(@PathVariable Integer individualId) {
-        return ResponseEntity.status(200).body(individualService.recommendHabitsByInterests(individualId));
-    }
-
     @PostMapping("/{individualId}/ai/generate-plan")
     public ResponseEntity<String> generateGoalPlan(@PathVariable Integer individualId, @RequestParam String userGoal) {
         return ResponseEntity.status(200).body(individualService.generateGoalPlan(individualId, userGoal));

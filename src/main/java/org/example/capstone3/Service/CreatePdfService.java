@@ -200,7 +200,7 @@ public class CreatePdfService {
                 "        .section { margin-bottom: 25px; padding: 15px; background-color: #f9f9f9; border-radius: 8px; }" +
                 "        .label { font-weight: bold; color: #555; }" +
                 "        table { width: 100%; border-collapse: collapse; margin-top: 15px; }" +
-                "        th { background-color: #1a1a2e; color: white; padding: 8px; text-align: left; font-size: 12px; }(" +
+                "        th { background-color: #1a1a2e; color: white; padding: 8px; text-align: left; font-size: 12px; }" +
                 "        td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 12px; }" +
                 "        tr:hover { background-color: #f1f1f1; }" +
                 "        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #999; }" +
