@@ -49,6 +49,12 @@ public class ChildController {
         return ResponseEntity.status(200).body(childService.getChildClaimedTaskRewards(childId));
     }
 
+    @GetMapping("/available-challenges/{childId}")
+    public ResponseEntity<?> getAvailableParentTasks(@PathVariable Integer childId) {
+        return ResponseEntity.status(200).body(childService.getAvailableParentTasks(childId));
+    }
+
+
 
 
 

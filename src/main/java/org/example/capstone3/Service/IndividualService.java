@@ -5,10 +5,7 @@ import org.example.capstone3.API.ApiException;
 import org.example.capstone3.DTO.In.IndividualDTOIn;
 import org.example.capstone3.DTO.Out.BadgeDTOOut;
 import org.example.capstone3.Models.*;
-import org.example.capstone3.Repository.CategoryRepository;
-import org.example.capstone3.Repository.HabitLogRepository;
-import org.example.capstone3.Repository.IndividualRepository;
-import org.example.capstone3.Repository.ParentRepository;
+import org.example.capstone3.Repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +25,7 @@ public class IndividualService {
     private final CreatePdfService createPdfService;
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
+    private final BadgeRepository badgeRepository;
 
 
     public List<Individual> getAllIndividuals() {
@@ -157,11 +155,20 @@ public class IndividualService {
             earnedBadges.append("- ").append(b.getTitle()).append("\n");
         }
 
+        List<Badge> allSystemBadges = badgeRepository.findAll();
+        StringBuilder systemBadgesSchema = new StringBuilder();
+        for (Badge b : allSystemBadges) {
+            systemBadgesSchema.append("- ").append(b.getTitle())
+                    .append(" (Required Points: ").append(b.getPointsRequired()).append(")\n");
+        }
+
         String prompt = "User: " + individual.getFullName() + "\n" +
                 "Current Total Points: " + individual.getPoints() + "\n" +
                 "Already Earned Badges:\n" + earnedBadges + "\n" +
-                "Review the current points and analyze which badges are upcoming (Standard milestones: Starter=100, Committed=500, Hero=1000, Legend=2500). " +
-                "Calculate exactly how many points are remaining for each locked badge, and give 2 tailored tips on how to reach them faster.\n" +
+                "Available System Badges & Milestones (From Database):\n" + systemBadgesSchema + "\n" +
+                "Review the user's current points against the system badges available in the database. " +
+                "Identify which badges are still locked, calculate exactly how many points are remaining for each locked badge, " +
+                "and give 2 tailored tips on how to reach the next locked milestone faster.\n" +
                 "Respond ONLY with a raw JSON object containing:\n" +
                 "1. 'currentPoints': Integer\n" +
                 "2. 'upcomingBadges': Array of objects (badgeTitle, requiredPoints, pointsRemaining)\n" +
@@ -170,6 +177,7 @@ public class IndividualService {
 
         return aiService.callClaudeApi(prompt);
     }
+
 
     public String getSmartHabitRoadmap(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);

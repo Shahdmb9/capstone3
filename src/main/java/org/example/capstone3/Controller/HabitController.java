@@ -35,17 +35,25 @@ public class HabitController {
         return ResponseEntity.status(200).body(this.habitService.getChildHabits(childId));
     }
 
-    @PostMapping("/add-habit-individual/{individualId}")
-    public ResponseEntity<ApiResponse> addHabitIndividual(@PathVariable Integer individualId, @RequestBody @Valid IndividualHabitDTO dto) {
-        this.habitService.addHabitIndividual(individualId, dto);
+    @PostMapping("/add-habit-individual/{individualId}/{categoryId}")
+    public ResponseEntity<ApiResponse> addHabitIndividual(
+            @PathVariable Integer individualId,
+            @PathVariable Integer categoryId,
+            @RequestBody @Valid IndividualHabitDTO dto) {
+        this.habitService.addHabitIndividual(individualId, categoryId, dto);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
     }
 
-    @PostMapping("/add-habit-parent/{parentId}/{childId}")
-    public ResponseEntity<ApiResponse> addHabitParent(@PathVariable Integer parentId, @PathVariable Integer childId, @RequestBody @Valid Habit habit) {
-        this.habitService.addHabitParent(parentId, childId, habit);
+    @PostMapping("/add-habit-parent/{parentId}/{childId}/{categoryId}")
+    public ResponseEntity<ApiResponse> addHabitParent(
+            @PathVariable Integer parentId,
+            @PathVariable Integer childId,
+            @PathVariable Integer categoryId,
+            @RequestBody @Valid Habit habit) {
+        this.habitService.addHabitParent(parentId, childId, categoryId, habit);
         return ResponseEntity.status(201).body(new ApiResponse("Habit added successfully"));
     }
+
 
     @PutMapping("/update/{habitId}")
     public ResponseEntity<ApiResponse> updateHabit(@PathVariable Integer habitId, @RequestBody IndividualHabitDTO dto) {
