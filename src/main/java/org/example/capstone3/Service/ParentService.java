@@ -33,6 +33,7 @@ public class ParentService {
     private final AiService aiService;
     private final ChildRepository childRepository;
     private final HabitLogRepository habitLogRepository;
+    private final WeatherService weatherService;
 
     public List<Parent> getAllParents() {
         return parentRepository.findAll();
@@ -201,12 +202,8 @@ public class ParentService {
         return leaderboard;
     }
 }
-    public String FamilyDisciplineScore(Integer parentId) {
-        Parent parent = parentRepository.findParentById(parentId);
-        if (parent == null) throw new ApiException("Parent not found");
-        return aiService.callClaudeApi(aiService.buildPromptFamilyScore(parent));
-    }
-}
+
+
 
 
 
