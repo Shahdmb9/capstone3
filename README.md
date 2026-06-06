@@ -26,7 +26,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `GET` | `/api/v1/habit/ia_risk_prediction/{id}` |
 | `GET` | `/api/v1/habit/ia_best_habit_time/{id}` |
  
-### 3 - Task (Reenad)
+### 3 - Task 
  
 | HTTP Method | API Path |
 | :--- | :--- |
@@ -34,7 +34,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `PUT` | `/api/v1/task/approve/{applicationId}/{action}` |
 | `GET` | `/api/v1/task/parent-pending/{parentId}` |
  
-### 4 - Task Reward (Reenad)
+### 4 - Task Reward 
  
 | HTTP Method | API Path |
 | :--- | :--- |
