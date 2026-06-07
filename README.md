@@ -33,10 +33,5 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `POST` | `/api/v1/task/apply/{childId}/{taskId}` |
 | `PUT` | `/api/v1/task/approve/{applicationId}/{action}` |
 | `GET` | `/api/v1/task/parent-pending/{parentId}` |
- 
-### 4 - Task Reward 
- 
-| HTTP Method | API Path |
-| :--- | :--- |
-| `POST` | `/api/v1/task-reward/add/{parentId}/{taskId}` |
+
  
