@@ -29,7 +29,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | HTTP Method | API Path |
 | :--- | :--- |
 | `PUT` | `/api/v1/parent/deduct-child-point/{parentId}/{childId}/{poits}` |
-`CRUD`
+
 
 
 ### 3-IndividualCotroller  
@@ -38,8 +38,5 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | :--- | :--- |
 | `GET` | `/api/v1/{individualId}/ai/roadmap` |
 
-### 4-Reward 
-
- `CRUD`
 
 
