@@ -5,32 +5,37 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 ## Class Diagram 
 ![Class Diagram](https://github.com/Shahdmb9/capstone3/blob/shahad/Class%20Diagram.jpg)
 
-# HABIT SYSTEM ENDPOINTS (CAPSTONE 3)
-
-### 1-Individual  
-
-| HTTP Method | API Path |
-| :--- | :--- |
-| `PUT` | `/api/v1/individual/add-interest/{individualId}/{categoryId}` |
-| `POST` | `/api/v1/individual/{individualId}/ai/generate-plan` |
-| `GET` | `/api/v1/individual/{individualId}/ai/achievement-index` |
-| `GET` | `/api/v1/individual/{individualId}/ai/badges-progress` |
+# SHAHAD ALBARRAK ENDPOINTS
 
 
-### 2-Parent 
+### 1-HabitCotroller
 
 | HTTP Method | API Path |
 | :--- | :--- |
-| `GET` | `/api/v1/parent/{parentId}/pending-habits` |
-| `GET` | `/api/v1/parent/{parentId}/children/{childId}/ai/behavior` |
-| `GET` | `/api/v1/parent/{parentId}/children/{childId}/ai/recommended-rewards` |
+| `PUT` | `/api/v1/habit/complete-habit/{habitLogId}` |
+| `PUT` | `/api/v1/habit/review-log-of-child/{parentId}/{habitId}/{status}` |
+| `GET` | `/api/v1/habit/category/{categoryId}` |
+| `GET` | `/api/v1/habit/habit-summary/{habitId}` |
+| `GET` | `/api/v1/habit/ai-habits/{individualId}` |
+| `GET` | `/api/v1/habit/accept-habit-suggested/{individualId}/{habitId}` |
+| `DELETE` | `/api/v1/habit/delete-all-ai-suggested/{individualId}` |
+| `GET` | `/api/v1/habit/get-ai-habit-suggested/{individualId}` |
+| `GET` | `/api/v1/habit/get-today-habits-child/{childId}` |
+| `GET` | `/api/v1/habit/get-today-habits-Individual/{individualId}` |
 
 
-### 3-Habit
+### 2-ParentCotroller
 
 | HTTP Method | API Path |
 | :--- | :--- |
-| `GET` | `/api/v1/child/{childId}/my-habits-rewards` |
-| `GET` | `/api/v1/child/{childId}/my-task-rewards` |
-| `GET` | `/api/v1/habit/{habitId}/ai/improvement` |
-| `GET` | `/api/v1/habit/{habitId}/ai/commitment` |
+| `PUT` | `/api/v1/parent/deduct-child-point/{parentId}/{childId}/{poits}` |
+
+
+
+### 3-IndividualCotroller  
+
+| HTTP Method | API Path |
+| :--- | :--- |
+| `GET` | `/api/v1/{individualId}/ai/advice` |
+
+
