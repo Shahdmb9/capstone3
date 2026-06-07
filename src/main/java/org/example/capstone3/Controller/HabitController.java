@@ -13,6 +13,8 @@ import org.example.capstone3.Service.HabitService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api/v1/habit")
 @RequiredArgsConstructor
@@ -130,6 +132,18 @@ public class HabitController {
     public ResponseEntity<?> getTodayHabitsForChild(@PathVariable Integer childId) {
         return ResponseEntity.status(200).body(habitService.getTodayHabitsForChild (childId));
     }
+
+    @GetMapping("/get-habit-by-date-individual/{individualId}/{date}")
+    public ResponseEntity<?> getHabitByDate(@PathVariable Integer individualId, @PathVariable LocalDate date) {
+        return ResponseEntity.status(200).body(habitService.getHabitByDateIndividual(individualId,date));
+    }
+
+    @GetMapping("/get-habit-by-date-child/{childId}/{date}")
+    public ResponseEntity<?> getHabitByDateChild(@PathVariable Integer childId, @PathVariable LocalDate date) {
+        return ResponseEntity.status(200).body(habitService.getHabitByDateChild(childId,date));
+    }
+
+
 
     @GetMapping("/habit-summary/{habitId}")
     public ResponseEntity<?> getHabitSummary(@PathVariable Integer habitId) {
