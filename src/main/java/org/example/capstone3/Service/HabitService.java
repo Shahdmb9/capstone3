@@ -483,9 +483,17 @@ public class HabitService {
         return child;
     }
 
-    public String getHabitCommitmentAnalysis(Integer habitId) {
+    public String getHabitCommitmentAnalysis(Integer individualId, Integer habitId) {
         Habit habit = habitRepository.findHabitById(habitId);
         if (habit == null) throw new ApiException("Habit not found");
+
+        if (habit.getIndividual() == null) {
+            throw new ApiException("Commitment analysis is exclusively available for Individual habits only");
+        }
+
+        if (!habit.getIndividual().getId().equals(individualId)) {
+            throw new ApiException("Access Denied: This habit does not belong to you");
+        }
 
         List<HabitLog> logs = habitLogRepository.findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
         int completedCount = logs.size();
@@ -494,9 +502,17 @@ public class HabitService {
         return aiService.callClaudeApi(prompt);
     }
 
-    public String getHabitImprovementAdvisor(Integer habitId) {
+    public String getHabitImprovementAdvisor(Integer individualId, Integer habitId) {
         Habit habit = habitRepository.findHabitById(habitId);
         if (habit == null) throw new ApiException("Habit not found");
+
+        if (habit.getIndividual() == null) {
+            throw new ApiException("Improvement advice is exclusively available for Individual habits only");
+        }
+
+        if (!habit.getIndividual().getId().equals(individualId)) {
+            throw new ApiException("Access Denied: This habit does not belong to you");
+        }
 
         String categoryName = (habit.getCategory() != null) ? habit.getCategory().getName() : "General";
 
@@ -515,6 +531,7 @@ public class HabitService {
 
         return aiService.callClaudeApi(prompt);
     }
+
 
 
     public String riskPrediction(Integer id) {

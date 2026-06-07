@@ -39,4 +39,3 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `GET` | `/api/v1/{individualId}/ai/advice` |
 
 
-

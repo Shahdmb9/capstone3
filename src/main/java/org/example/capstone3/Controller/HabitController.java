@@ -113,14 +113,14 @@ public class HabitController {
         return ResponseEntity.status(200).body(habitService.BestHabitTime(id));
     }
 
-    @GetMapping("/{habitId}/ai/improvement")
-    public ResponseEntity<String> getHabitImprovementAdvisor(@PathVariable Integer habitId) {
-        return ResponseEntity.status(200).body(habitService.getHabitImprovementAdvisor(habitId));
+    @GetMapping("/{individualId}/{habitId}/ai/improvement")
+    public ResponseEntity<String> getHabitImprovementAdvisor(@PathVariable Integer individualId, @PathVariable Integer habitId) {
+        return ResponseEntity.status(200).body(habitService.getHabitImprovementAdvisor(individualId, habitId));
     }
 
-    @GetMapping("/{habitId}/ai/commitment")
-    public ResponseEntity<String> getHabitCommitmentAnalysis(@PathVariable Integer habitId) {
-        return ResponseEntity.status(200).body(habitService.getHabitCommitmentAnalysis(habitId));
+    @GetMapping("/{individualId}/{habitId}/ai/commitment")
+    public ResponseEntity<String> getHabitCommitmentAnalysis(@PathVariable Integer individualId, @PathVariable Integer habitId) {
+        return ResponseEntity.status(200).body(habitService.getHabitCommitmentAnalysis(individualId, habitId));
     }
 
     @GetMapping("/get-today-habits-Individual/{id}")

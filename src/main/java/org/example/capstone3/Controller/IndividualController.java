@@ -51,10 +51,11 @@ public class IndividualController {
         return ResponseEntity.status(200).body(new ApiResponse("Interest added successfully"));
     }
 
-    @PostMapping("/{individualId}/ai/generate-plan")
-    public ResponseEntity<String> generateGoalPlan(@PathVariable Integer individualId, @RequestParam String userGoal) {
+    @PostMapping("/{individualId}/ai/generate-plan/{userGoal}")
+    public ResponseEntity<String> generateGoalPlan(@PathVariable Integer individualId, @PathVariable String userGoal) {
         return ResponseEntity.status(200).body(individualService.generateGoalPlan(individualId, userGoal));
     }
+
 
     @GetMapping("/{individualId}/ai/achievement-index")
     public ResponseEntity<String> getAchievementIndex(@PathVariable Integer individualId, @RequestParam String period) {
