@@ -36,7 +36,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 
 | HTTP Method | API Path |
 | :--- | :--- |
-| `GET` | `/api/v1/{individualId}/ai/roadmap` |
+| `GET` | `/api/v1/{individualId}/ai/advice` |
 
 
 
