@@ -5,7 +5,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 ## Class Diagram 
 ![Class Diagram](https://github.com/Shahdmb9/capstone3/blob/shahad/Class%20Diagram.jpg)
 
-# HABIT SYSTEM ENDPOINTS (CAPSTONE 3)
+# SHAHAD ALBARRAK ENDPOINTS
 
 
 ### 1-HabitCotroller
