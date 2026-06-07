@@ -18,8 +18,11 @@ public interface HabitLogRepository extends JpaRepository<HabitLog, Integer> {
 
     HabitLog findHabitLogsByCreatedAt(LocalDate date);
 
+
     HabitLog findByHabitAndCreatedAt(Habit habit, LocalDate CreatedAt);
 
+
+    List<HabitLog> findHabitLogByApprovalStatusAndCreatedAt( String approvalStatus, LocalDate createdAt);
 
     // All logs for a given date across multiple habits — used to fetch today's full list
 //    List<HabitLog> findByHabitInAndLoggedDate(Set<Habit> habits, LocalDate loggedDate);
