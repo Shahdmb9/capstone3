@@ -12,7 +12,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | HTTP Method | API Path |
 | :--- | :--- |
 | `PUT` | `/api/v1/individual/add-interest/{individualId}/{categoryId}` |
-| `POST` | `/api/v1/individual/{individualId}/ai/generate-plan` |
+| `POST` | `/api/v1/individual/{individualId}/{{userGoal}}/ai/generate-plan` |
 | `GET` | `/api/v1/individual/{individualId}/ai/achievement-index` |
 | `GET` | `/api/v1/individual/{individualId}/ai/badges-progress` |
 
@@ -33,5 +33,5 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `GET` | `/api/v1/child/{childId}/my-habits-rewards` |
 | `GET` | `/api/v1/child/{childId}/my-task-rewards` |
 | `GET` | `/api/v1/child/{childId}/available-challenges` |
-| `GET` | `/api/v1/habit/{habitId}/ai/improvement` |
-| `GET` | `/api/v1/habit/{habitId}/ai/commitment` |
+| `GET` | `/api/v1/habit/{individualId}/{habitId}/ai/improvement` |
+| `GET` | `/api/v1/habit/{individualId}/{habitId}/ai/commitment` |
