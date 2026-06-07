@@ -32,5 +32,6 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | :--- | :--- |
 | `GET` | `/api/v1/child/{childId}/my-habits-rewards` |
 | `GET` | `/api/v1/child/{childId}/my-task-rewards` |
+| `GET` | `/api/v1/child/{childId}/available-challenges` |
 | `GET` | `/api/v1/habit/{habitId}/ai/improvement` |
 | `GET` | `/api/v1/habit/{habitId}/ai/commitment` |
