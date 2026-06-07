@@ -3,8 +3,10 @@ package org.example.capstone3.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.capstone3.API.ApiException;
+import org.example.capstone3.DTO.In.ParentDTOIn;
 import org.example.capstone3.Models.Parent;
 import org.example.capstone3.Repository.ParentRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,12 +16,13 @@ import java.util.List;
 public class ParentService {
 
     private final ParentRepository parentRepository;
-
+    private  final ModelMapper modelMapper;
     public List<Parent> getAllParents(){
         return parentRepository.findAll();
     }
 
-    public void add(Parent parent){
+    public void add(ParentDTOIn parentIn){
+        Parent parent = modelMapper.map(parentIn , Parent.class);
         parent.setCreatedAt(java.time.LocalDateTime.now());
         parentRepository.save(parent);
     }
@@ -29,7 +32,8 @@ public class ParentService {
         parentRepository.delete(parent);
     }
 
-    public void update(Integer id,Parent parent){
+    public void update(Integer id, ParentDTOIn parentin){
+        Parent parent = modelMapper.map(parentin , Parent.class);
         Parent oldParent=getParentById(id);
         oldParent.setEmail(parent.getEmail());
         oldParent.setFullName(parent.getFullName());

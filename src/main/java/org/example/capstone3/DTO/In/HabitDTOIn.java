@@ -24,9 +24,9 @@ public class HabitDTOIn {
 
     private Boolean isAiSuggested = false;
 
-    // Only one should be provided
+
     private Integer individualId;
-    private Long parentId;
+    private Integer parentId;
     private Integer childId;
 
     @NotNull(message = "Category is required")
