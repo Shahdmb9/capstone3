@@ -15,7 +15,7 @@ AI-Driven Habit Cultivation & Family Gamification SystemAn advanced web ecosyste
 | `PUT` | `/api/v1/habit/complete-habit/{habitLogId}` |
 | `PUT` | `/api/v1/habit/review-log-of-child/{parentId}/{habitId}/{status}` |
 | `GET` | `/api/v1/habit/category/{categoryId}` |
-| `GET` | `/api/v1/habit/get-today-habits-Individual/{id}` |
+| `GET` | `/api/v1/habit/habit-summary/{habitId}` |
 | `GET` | `/api/v1/habit/ai-habits/{individualId}` |
 | `GET` | `/api/v1/habit/accept-habit-suggested/{individualId}/{habitId}` |
 | `DELETE` | `/api/v1/habit/delete-all-ai-suggested/{individualId}` |
