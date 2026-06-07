@@ -185,7 +185,7 @@ public class IndividualService {
         return aiService.callClaudeApi(prompt);
     }
 
-    public SmartHabitsResponse getSmartHabitRoadmap(Integer individualId) {
+    public SmartHabitsResponse getAiAdvice(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) {
             throw new ApiException("Individual not found");
@@ -228,23 +228,6 @@ public class IndividualService {
     }
 
 
-    public void sendIndividualRoadmapReport(Integer individualId) {
-        Individual individual = individualRepository.findIndividualById(individualId);
-        if (individual == null) throw new ApiException("Individual not found");
-
-        Profile profile = individual.getProfile();
-        String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
-
-
-        String prompt = "Create a progressive 'Smart Habit Roadmap' for goal: \"" + mainGoal + "\" divided into 3 phases in JSON format. " +
-                "The JSON MUST strictly use these keys: 'goal', 'phases', 'phase_name', 'duration_weeks', 'habits', 'habit_name', 'description', 'category', 'points_per_completion'. Respond ONLY with raw JSON.";
-
-        String rawJsonRoadmap = aiService.callClaudeApi(prompt);
-
-        byte[] pdfBytes = createPdfService.generateAiRoadmapPdf(individual.getFullName(), rawJsonRoadmap);
-
-        emailService.sendReportByEmail(individual.getEmail(), pdfBytes, individual.getFullName(), "Smart Habit Roadmap");
-    }
     public Set<Badge> getIndividualBadges(Integer individualId) {
         Individual individual = individualRepository.findById(individualId)
                 .orElseThrow(() -> new ApiException("Individual not found"));
