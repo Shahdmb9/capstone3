@@ -92,30 +92,20 @@ public class IndividualService {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) throw new ApiException("Individual not found");
 
-        Profile profile = individual.getProfile();
-        if (profile == null) throw new ApiException("Please complete your health profile first");
-
-        StringBuilder currentHabits = new StringBuilder();
-        for (Habit h : individual.getHabits()) {
-            currentHabits.append("- ").append(h.getTitle()).append("\n");
-        }
-
-        String prompt = "User Goal: \"" + userGoal + "\"\n" +
-                "User Profile Details:\n" +
-                "- Age: " + profile.getAge() + "\n" +
-                "- Weight: " + profile.getWeight() + " kg\n" +
-                "- Height: " + profile.getHeight() + " cm\n" +
-                "- Medical Conditions: " + profile.getMedicalConditions() + "\n" +
-                "- Bad Habits to break: " + profile.getBadHabit() + "\n\n" +
-                "Current Active Habits:\n" + currentHabits + "\n" +
-                "Generate a structured fitness/lifestyle plan tailored strictly to these metrics. Provide a JSON object containing:\n" +
-                "1. 'summary': 2-3 sentences explaining the strategy.\n" +
-                "2. 'recommendedHabits': Array of new habits to add (title, description, frequency).\n" +
-                "3. 'warnings': Any health/medical precautions based on their profile.\n" +
+        String prompt = "The user has set a new personal goal: \"" + userGoal + "\".\n" +
+                "Based strictly on this goal, please generate a structured habit and lifestyle plan. " +
+                "Respond ONLY with a raw JSON object containing exactly these fields (do not include markdown or text before/after):\n" +
+                "{\n" +
+                "  \"summary\": \"A 2-3 sentence strategic explanation of how to achieve this goal.\",\n" +
+                "  \"recommendedHabits\": [\n" +
+                "    { \"title\": \"Habit Title\", \"description\": \"Short description under 15 words.\" }\n" +
+                "  ]\n" +
+                "}\n" +
                 "Respond ONLY with raw JSON.";
 
         return aiService.callClaudeApi(prompt);
     }
+
 
 
     public String getAchievementIndex(Integer individualId, String period) {
@@ -185,7 +175,7 @@ public class IndividualService {
         return aiService.callClaudeApi(prompt);
     }
 
-    public SmartHabitsResponse getSmartHabitRoadmap(Integer individualId) {
+    public SmartHabitsResponse getAiAdvice(Integer individualId) {
         Individual individual = individualRepository.findIndividualById(individualId);
         if (individual == null) {
             throw new ApiException("Individual not found");
@@ -228,23 +218,6 @@ public class IndividualService {
     }
 
 
-    public void sendIndividualRoadmapReport(Integer individualId) {
-        Individual individual = individualRepository.findIndividualById(individualId);
-        if (individual == null) throw new ApiException("Individual not found");
-
-        Profile profile = individual.getProfile();
-        String mainGoal = (profile != null) ? profile.getMainGoal() : "General self-improvement";
-
-
-        String prompt = "Create a progressive 'Smart Habit Roadmap' for goal: \"" + mainGoal + "\" divided into 3 phases in JSON format. " +
-                "The JSON MUST strictly use these keys: 'goal', 'phases', 'phase_name', 'duration_weeks', 'habits', 'habit_name', 'description', 'category', 'points_per_completion'. Respond ONLY with raw JSON.";
-
-        String rawJsonRoadmap = aiService.callClaudeApi(prompt);
-
-        byte[] pdfBytes = createPdfService.generateAiRoadmapPdf(individual.getFullName(), rawJsonRoadmap);
-
-        emailService.sendReportByEmail(individual.getEmail(), pdfBytes, individual.getFullName(), "Smart Habit Roadmap");
-    }
     public Set<Badge> getIndividualBadges(Integer individualId) {
         Individual individual = individualRepository.findById(individualId)
                 .orElseThrow(() -> new ApiException("Individual not found"));

@@ -36,7 +36,7 @@ public class HabitService {
     private final RewardRepository rewardRepository;
     private final BadgeRepository badgeRepository;
 
-    //creating logs for the users evrey say
+    //creating logs for the users evreyday
     @Scheduled(cron = "0 0 0 * * *")
     public void evaluateHabitsDaily() {
         List<Habit> allHabits = habitRepository.findByIsAiSuggestedFalse();
@@ -45,6 +45,25 @@ public class HabitService {
             habitLogRepository.save(log);
         }
     }
+
+    //alerting to complete the habit
+    @Scheduled(cron = "0 0 18 * * *")
+    public void alert() {
+        List<HabitLog> allHabitsLog = habitLogRepository.findHabitLogByApprovalStatusAndCreatedAt("NOT_STARTED",LocalDate.now());
+        for (HabitLog habitlog : allHabitsLog) {
+            Habit habit=habitRepository.findHabitById(habitlog.getHabit().getId());
+            if(habit.getIndividual()!=null) {
+                Individual individual = habit.getIndividual();
+                sendAlertMessage(individual.getPhoneNumber());
+            }
+            if (habit.getParent() != null) {
+                Parent parent = habit.getParent();
+                sendAlertMessageParent(parent.getPhoneNumber());
+            }
+        }
+    }
+
+
 
     public List<Habit> getIndividualHabits(Integer individualId) {
         return habitRepository.findHabitByIsAiSuggestedFalseAndIndividualId(individualId);
@@ -78,7 +97,7 @@ public class HabitService {
         habit.setHighestStreak(0);
         if (dto.getPoints() != null) habit.setPoints(dto.getPoints());
 
-        HabitLog habitLog = new HabitLog(null, LocalDate.now(), "NOT_STARTED", null, null, habit);
+        HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
 
         habitRepository.save(habit);
         habitLogRepository.save(habitLog);
@@ -102,7 +121,7 @@ public class HabitService {
         habit.setChild(child);
         habit.setCategory(category);
 
-        HabitLog habitLog = new HabitLog(null, LocalDate.now(), "NOT_STARTED", null, null, habit);
+        HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
 
         habitRepository.save(habit);
         habitLogRepository.save(habitLog);
@@ -159,10 +178,12 @@ public class HabitService {
         Individual individual = getIndividual(individualId);
         List<TodayHabitDTO> result = new ArrayList<>();
         for (Habit habit : individual.getHabits()) {
-            HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, date);
-            result.add(new TodayHabitDTO(habit.getId(),log.getId(), habit.getTitle(),
-                    habit.getDescription(), habit.getPoints(), habit.getStreak(),habit.getHighestStreak(), log.getApprovalStatus()));
-        }
+            if(habit.getIsAiSuggested()==false) {
+                HabitLog log = habitLogRepository.findByHabitAndCreatedAt(habit, date);
+                result.add(new TodayHabitDTO(habit.getId(), log.getId(), habit.getTitle(),
+                        habit.getDescription(), habit.getPoints(), habit.getStreak(), habit.getHighestStreak(), log.getApprovalStatus()));
+            }
+            }
         return result;
     }
 
@@ -352,8 +373,11 @@ public class HabitService {
         Individual individual = getIndividual(individualId);
         if (individual != habit.getIndividual()) throw new ApiException("This is not your habit");
         habit.setIsAiSuggested(false);
-        createHabitLog(habit);
+        HabitLog habitLog = new HabitLog(null, null, "NOT_STARTED", null, LocalDate.now(), habit);
+
         habitRepository.save(habit);
+        habitLogRepository.save(habitLog);
+
     }
 
     public HabitLog createHabitLog(Habit habit) {
@@ -405,8 +429,10 @@ public class HabitService {
                 Habit habit=modelMapper.map(routine,Habit.class);
                 habit.setIndividual(individual);
                 String cateName=aiService.callClaudeApi("classify this habit by name "+habit.getDescription()+" to one of :"+interest.toString()+"as : 'name': e.g., 'sport'");
-                habit.setCategory(categoryRepository.findCategoryByNameIgnoreCase(new JSONObject(cateName).getString("name")));
+//                habit.setCategory(categoryRepository.findCategoryByNameIgnoreCase(new JSONObject(cateName).getString("name")));
                 habit.setIsAiSuggested(true);
+                habit.setStreak(0);
+                habit.setHighestStreak(0);
                 habitRepository.save(habit);
             }
         } catch (Exception e) {
@@ -457,9 +483,17 @@ public class HabitService {
         return child;
     }
 
-    public String getHabitCommitmentAnalysis(Integer habitId) {
+    public String getHabitCommitmentAnalysis(Integer individualId, Integer habitId) {
         Habit habit = habitRepository.findHabitById(habitId);
         if (habit == null) throw new ApiException("Habit not found");
+
+        if (habit.getIndividual() == null) {
+            throw new ApiException("Commitment analysis is exclusively available for Individual habits only");
+        }
+
+        if (!habit.getIndividual().getId().equals(individualId)) {
+            throw new ApiException("Access Denied: This habit does not belong to you");
+        }
 
         List<HabitLog> logs = habitLogRepository.findByHabitAndApprovalStatusOrderByLoggedDateDesc(habit, "COMPLETED");
         int completedCount = logs.size();
@@ -468,9 +502,17 @@ public class HabitService {
         return aiService.callClaudeApi(prompt);
     }
 
-    public String getHabitImprovementAdvisor(Integer habitId) {
+    public String getHabitImprovementAdvisor(Integer individualId, Integer habitId) {
         Habit habit = habitRepository.findHabitById(habitId);
         if (habit == null) throw new ApiException("Habit not found");
+
+        if (habit.getIndividual() == null) {
+            throw new ApiException("Improvement advice is exclusively available for Individual habits only");
+        }
+
+        if (!habit.getIndividual().getId().equals(individualId)) {
+            throw new ApiException("Access Denied: This habit does not belong to you");
+        }
 
         String categoryName = (habit.getCategory() != null) ? habit.getCategory().getName() : "General";
 
@@ -491,6 +533,7 @@ public class HabitService {
     }
 
 
+
     public String riskPrediction(Integer id) {
         Habit habit = habitRepository.findHabitById(id);
         if (habit == null) throw new RuntimeException("Habit not found");
@@ -501,5 +544,22 @@ public class HabitService {
         Habit habit = habitRepository.findHabitById(id);
         if (habit == null) throw new RuntimeException("Habit not found");
         return aiService.callClaudeApi(aiService.buildPromptBestTime(habit));
+    }
+    public void sendAlertMessage(String number){
+
+        String topic="you have uncompleted habit dont forget to complete it";
+        String tone="alerting and reminder to complete the habit";
+        String lang="arabic";
+        String message=aiService.generateWhatsAppMessage(topic,tone,lang);
+        whatsAppService.whatsAppMessage(number,message);
+    }
+
+    public void sendAlertMessageParent(String number){
+
+        String topic="your child have uncompleted habit remind him to complete it";
+        String tone="alerting and reminder to complete the habit";
+        String lang="arabic";
+        String message=aiService.generateWhatsAppMessage(topic,tone,lang);
+        whatsAppService.whatsAppMessage(number,message);
     }
 }

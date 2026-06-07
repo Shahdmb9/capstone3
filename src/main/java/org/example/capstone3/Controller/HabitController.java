@@ -13,6 +13,8 @@ import org.example.capstone3.Service.HabitService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api/v1/habit")
 @RequiredArgsConstructor
@@ -111,14 +113,14 @@ public class HabitController {
         return ResponseEntity.status(200).body(habitService.BestHabitTime(id));
     }
 
-    @GetMapping("/{habitId}/ai/improvement")
-    public ResponseEntity<String> getHabitImprovementAdvisor(@PathVariable Integer habitId) {
-        return ResponseEntity.status(200).body(habitService.getHabitImprovementAdvisor(habitId));
+    @GetMapping("/{individualId}/{habitId}/ai/improvement")
+    public ResponseEntity<String> getHabitImprovementAdvisor(@PathVariable Integer individualId, @PathVariable Integer habitId) {
+        return ResponseEntity.status(200).body(habitService.getHabitImprovementAdvisor(individualId, habitId));
     }
 
-    @GetMapping("/{habitId}/ai/commitment")
-    public ResponseEntity<String> getHabitCommitmentAnalysis(@PathVariable Integer habitId) {
-        return ResponseEntity.status(200).body(habitService.getHabitCommitmentAnalysis(habitId));
+    @GetMapping("/{individualId}/{habitId}/ai/commitment")
+    public ResponseEntity<String> getHabitCommitmentAnalysis(@PathVariable Integer individualId, @PathVariable Integer habitId) {
+        return ResponseEntity.status(200).body(habitService.getHabitCommitmentAnalysis(individualId, habitId));
     }
 
     @GetMapping("/get-today-habits-Individual/{id}")
@@ -130,6 +132,18 @@ public class HabitController {
     public ResponseEntity<?> getTodayHabitsForChild(@PathVariable Integer childId) {
         return ResponseEntity.status(200).body(habitService.getTodayHabitsForChild (childId));
     }
+
+    @GetMapping("/get-habit-by-date-individual/{individualId}/{date}")
+    public ResponseEntity<?> getHabitByDate(@PathVariable Integer individualId, @PathVariable LocalDate date) {
+        return ResponseEntity.status(200).body(habitService.getHabitByDateIndividual(individualId,date));
+    }
+
+    @GetMapping("/get-habit-by-date-child/{childId}/{date}")
+    public ResponseEntity<?> getHabitByDateChild(@PathVariable Integer childId, @PathVariable LocalDate date) {
+        return ResponseEntity.status(200).body(habitService.getHabitByDateChild(childId,date));
+    }
+
+
 
     @GetMapping("/habit-summary/{habitId}")
     public ResponseEntity<?> getHabitSummary(@PathVariable Integer habitId) {
