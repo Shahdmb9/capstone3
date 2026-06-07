@@ -66,16 +66,11 @@ public class IndividualController {
         return ResponseEntity.status(200).body(individualService.getBadgeProgressAdvisor(individualId));
     }
 
-    @GetMapping("/{individualId}/ai/roadmap")
+    @GetMapping("/{individualId}/ai/advice")
     public ResponseEntity<?> getSmartHabitRoadmap(@PathVariable Integer individualId) {
-        return ResponseEntity.status(200).body(individualService.getSmartHabitRoadmap(individualId));
+        return ResponseEntity.status(200).body(individualService.getAiAdvice(individualId));
     }
 
-    @GetMapping("/{individualId}/ai/send-roadmap-report")
-    public ResponseEntity<ApiResponse> sendRoadmapReport(@PathVariable Integer individualId) {
-        individualService.sendIndividualRoadmapReport(individualId);
-        return ResponseEntity.status(200).body(new ApiResponse("Smart Habit Roadmap PDF report has been compiled and sent to your email successfully"));
-    }
 
     @GetMapping("/my-badges/{individualId}")
     public ResponseEntity<?> getMyBadges(@PathVariable Integer individualId) {
