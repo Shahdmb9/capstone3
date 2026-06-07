@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.capstone3.Repository.TaskRewardRepository;
 import org.springframework.stereotype.Service;
 
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -76,6 +77,35 @@ public class ChildService {
 
         return taskRewardRepository.findByWinnerChildIdAndStatus(childId, "COMPLETED");
     }
+
+    public List<org.example.capstone3.Models.Task> getAvailableParentTasks(Integer childId) {
+        Child child = childRepository.findChildById(childId);
+        if (child == null) {
+            throw new ApiException("Child not found");
+        }
+
+        Parent parent = child.getParent();
+        if (parent == null) {
+            throw new ApiException("This child is not linked to any parent");
+        }
+
+        List<Task> openTasks = new ArrayList<>();
+
+        if (parent.getTask() != null) {
+            for (org.example.capstone3.Models.Task task : parent.getTask()) {
+                if (task.getStatus() == null || !"COMPLETED".equalsIgnoreCase(task.getStatus())) {
+                    openTasks.add(task);
+                }
+            }
+        }
+
+        if (openTasks.isEmpty()) {
+            throw new ApiException("No open challenges available from your parent at the moment");
+        }
+
+        return openTasks;
+    }
+
 
 
 
